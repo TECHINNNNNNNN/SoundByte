@@ -1,0 +1,26 @@
+# Root .gitignore for SoundByte monorepo
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+Thumbs.db
+
+# Test coverage
+coverage/
+*.lcov
+
+# Temporary files
+tmp/
+temp/
