@@ -1,8 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// This is your updated Prisma schema file
+// Location: backend/prisma/schema.prisma
+// 
+// INSTRUCTIONS:
+// 1. Replace the entire content of backend/prisma/schema.prisma with this
+// 2. Run: cd backend && npx prisma migrate dev --name add-conversations
+// 3. Run: npx prisma generate
 
 generator client {
   provider = "prisma-client-js"
@@ -26,8 +28,9 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  accounts Account[]
-  sessions Session[]
+  accounts      Account[]
+  sessions      Session[]
+  conversations Conversation[] // Added: User can have many conversations
 
   @@map("users")
 }
@@ -71,4 +74,34 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+// NEW MODELS FOR CONVERSATION SYSTEM
+
+model Conversation {
+  id        String    @id @default(cuid())
+  title     String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // 'user' or 'assistant'
+  content        String       @db.Text
+  audioUrl       String? // S3 URL for audio files
+  audioDuration  Int? // Duration in seconds
+  metadata       Json? // Store sources, settings, model info, etc.
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@map("messages")
 }

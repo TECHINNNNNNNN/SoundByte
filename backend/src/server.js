@@ -7,17 +7,21 @@ import rateLimit from "express-rate-limit"
 import authRoutes from "./routes/auth.js"
 import "./config/passport.js"
 import cookieParser from "cookie-parser"
+import conversationRoutes from "./routes/conversations.js"
+import messageRoutes from "./routes/messages.js"
 
 dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// Rate Limiter
+// Rate Limiter - relaxed for development
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: "Too many requests, please try again later."
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: process.env.NODE_ENV === 'production' ? 100 : 1000, // 1000 for dev, 100 for prod
+    message: "Too many requests, please try again later.",
+    standardHeaders: true, // Return rate limit info in headers
+    legacyHeaders: false,
 })
 
 app.use(limiter)
@@ -49,20 +53,22 @@ app.use(session({
 app.use(passport.initialize())
 
 app.use("/api/auth", authRoutes)
+app.use("/api/conversations", conversationRoutes)
+app.use("/api/conversations", messageRoutes)
 
 
 // Health check endpoint
-app.get("/health", (req, res) => {
+app.get("/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() })
 })
 
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
     console.error("Error:", err)
     res.status(500).json({ message: "SoundByte API is currently experiencing issues. Please try again later." })
 })
 
-// Catch-all 404 handler - Express 5 compatible
-app.use((req, res) => {
+// Catch-all 404 handler
+app.use((_req, res) => {
     res.status(404).json({ message: "Route not found" })
 })
 

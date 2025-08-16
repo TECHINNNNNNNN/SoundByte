@@ -4,9 +4,10 @@ import Login from './components/Login'
 import Register from './components/Register'
 import AuthCallback from './components/AuthCallback'
 import ProtectedRoute from './components/ProtectedRoute'
-import Dashboard from './pages/Dashboard'
 import Home from './pages/Home'
 import Profile from './pages/Profile'
+import ChatLayout from './components/Layout/ChatLayout'
+import ChatInterface from './components/Chat/ChatInterface'
 import './index.css'
 
 function App() {
@@ -19,13 +20,16 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          
-          {/* Protected routes */}
+
+          {/* Protected routes with chat layout */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<ChatLayout />}>
+              <Route index element={<ChatInterface />} />
+              <Route path="chat/:conversationId" element={<ChatInterface />} />
+            </Route>
             <Route path="/profile" element={<Profile />} />
           </Route>
-          
+
           {/* Catch all - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
