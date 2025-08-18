@@ -9,6 +9,7 @@ import "./config/passport.js"
 import cookieParser from "cookie-parser"
 import conversationRoutes from "./routes/conversations.js"
 import messageRoutes from "./routes/messages.js"
+import aiRoutes from "./routes/ai.routes.js"
 
 dotenv.config()
 
@@ -55,6 +56,7 @@ app.use(passport.initialize())
 app.use("/api/auth", authRoutes)
 app.use("/api/conversations", conversationRoutes)
 app.use("/api/conversations", messageRoutes)
+app.use("/api/ai", aiRoutes)
 
 
 // Health check endpoint

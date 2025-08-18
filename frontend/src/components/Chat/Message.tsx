@@ -39,8 +39,12 @@ const MessageComponent = ({ message }: MessageProps) => {
 
                     {/* Audio Player (if audio exists) */}
                     {message.audioUrl && (
-                        <div className="mt-2">
-                            <audio controls className="max-w-xs">
+                        <div className="mt-2 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-purple-600">🎧</span>
+                                <span className="text-sm font-medium text-gray-700">Audio Summary Available</span>
+                            </div>
+                            <audio controls className="w-full max-w-md">
                                 <source src={message.audioUrl} type="audio/mpeg" />
                                 Your browser does not support the audio element.
                             </audio>
