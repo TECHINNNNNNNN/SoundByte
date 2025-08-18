@@ -54,8 +54,13 @@ const ChatInterface = () => {
             const userMessage = await conversationService.addMessage(conversationId, content, 'user')
             setMessages(prev => [...prev, userMessage])
             
-            // Show AI is thinking
-            setAiStatus('🤔 Thinking...')
+            // Show AI is working
+            const isNewsQuery = content.toLowerCase().includes('news') || 
+                               content.toLowerCase().includes('latest') ||
+                               content.toLowerCase().includes('today')
+            setAiStatus(isNewsQuery 
+                ? '🔍 Researching news and generating audio... (this may take a minute)'
+                : '💭 Generating response...')
             
             // Call AI service
             const aiResponse = await aiService.sendMessage(conversationId, content)
@@ -73,7 +78,8 @@ const ChatInterface = () => {
             setMessages(prev => [...prev, assistantMessage])
         } catch (error) {
             console.error('Failed to send message:', error)
-            setAiStatus('')
+            setAiStatus('❌ Something went wrong. Please try again.')
+            setTimeout(() => setAiStatus(''), 3000)
         } finally {
             setSending(false)
             setAiStatus('')
