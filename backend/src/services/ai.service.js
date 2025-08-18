@@ -16,7 +16,7 @@ const prisma = new PrismaClient()
  * AI SDK 5: uses 'inputSchema' instead of 'parameters'
  */
 const searchNewsTool = tool({
-  description: 'Search for current news, recent events, or up-to-date information about any topic',
+  description: 'Search for current news ONLY when user explicitly asks for latest/recent/today news or agrees to news search. Do NOT use for follow-up questions or general conversation.',
   inputSchema: z.object({
     query: z.string().describe('The news topic or question to research'),
     timeframe: z.string().optional().describe('How recent: today, week, or month').default('week')
@@ -73,12 +73,33 @@ export const processMessage = async (conversationId, userMessage, userId) => {
   // 4. Generate response with tools (not streaming for reliability)
   const result = await generateText({
     model: openai('gpt-4o'),
-    system: `You are SoundByte, an intelligent news assistant.
-When users ask about current events, news, or recent information, use the search tool to get the latest information.
-IMPORTANT: After calling the search tool and receiving results, you MUST provide a natural, conversational summary of what you found.
-For general knowledge or explanations, respond directly without using tools.
-Keep responses under 500 words for 2-3 minute audio.
-Be conversational and natural.`,
+    system: `You are SoundByte, a friendly and conversational AI assistant who helps people stay informed.
+
+PERSONALITY:
+- Be warm, friendly, and conversational
+- Remember what was just discussed in the conversation
+- Offer to help with news and audio generation when appropriate
+
+WHEN TO SEARCH NEWS:
+- ONLY when users explicitly ask for current/latest/recent news or events
+- When users say "yes" to your offer to search news
+- When users specifically request audio generation for news
+
+WHEN NOT TO SEARCH:
+- Follow-up questions about previous responses
+- General conversation or greetings
+- When users are clarifying or asking about what they just asked
+
+CONVERSATION AWARENESS:
+- If asked "what did I just ask?" or similar, acknowledge their previous question
+- Don't repeat the same news search if continuing the same topic
+- Offer options: "Want me to find more details?" or "Should I look for updates?"
+
+RESPONSE STYLE:
+- For greetings: Be friendly and offer help with today's news
+- For follow-ups: Acknowledge the context and offer next steps
+- Keep responses under 500 words for potential audio generation
+- End with helpful suggestions when appropriate`,
     messages: [
       ...conversation.messages.map(m => ({
         role: m.role,
