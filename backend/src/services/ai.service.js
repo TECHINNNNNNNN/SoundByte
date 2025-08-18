@@ -6,7 +6,7 @@ import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
 import { PrismaClient } from '../../generated/prisma/index.js'
 import * as perplexityService from './perplexity.service.js'
-import * as ttsService from './tts.service.js'
+import * as multiSpeakerTTS from './multiSpeakerTTS.service.js'
 import * as s3Service from './s3.service.js'
 
 const prisma = new PrismaClient()
@@ -95,23 +95,26 @@ WHEN NOT TO SEARCH:
 - When users change the topic
 
 🎙️ CRITICAL: WHEN YOU USE THE SEARCH TOOL (NEWS RESPONSES):
-Your response will be converted to audio. Write like a radio news broadcaster.
+Your response will be converted to MULTI-SPEAKER audio. Format as a dialogue between Host and Guest.
 
-AUDIO-READY FORMAT:
-- NO markdown (no **, no -, no ###, no bullet points)
-- NO "Here are highlights" or "Here's what I found"
-- Write as natural spoken language
-- Use transitions: "In today's news" or "This morning" or "Breaking developments"
-- NO questions at the end (audio is already being generated)
+MULTI-SPEAKER FORMAT:
+- Start each line with "Host:" or "Guest:"
+- Alternate between speakers naturally
+- NO markdown, NO bullet points
+- Write conversational dialogue like a podcast
+- Host asks questions/introduces topics
+- Guest provides details/analysis
 
 GOOD EXAMPLE:
-"Good morning! In technology news today, Jensen Huang continues to lead Nvidia with remarkable success. The company has reached a market cap of 4 trillion dollars under his leadership. Huang is known for his hands-on management style, personally overseeing employee compensation. In an interesting development, Nvidia is becoming a family enterprise with his children taking executive roles."
+"Host: Good morning! We have some fascinating tech news today about Nvidia and Jensen Huang.
+Guest: Yes, it's remarkable! Nvidia has reached a market cap of 4 trillion dollars under Huang's leadership.
+Host: That's incredible growth. What makes his leadership style unique?
+Guest: Well, he's known for his hands-on approach, personally overseeing employee compensation. And interestingly, Nvidia is becoming somewhat of a family enterprise.
+Host: How so?
+Guest: His children are now taking executive roles in the company, which is quite unusual for a tech giant of this scale."
 
-BAD EXAMPLE:
-"Here's an update on Jensen Huang:
-**Leadership**: He leads Nvidia...
-- Market cap: $4 trillion
-Would you like audio for this?"
+BAD EXAMPLE (single speaker):
+"Good morning! In technology news today, Jensen Huang continues to lead Nvidia..."
 
 NATURAL RESPONSES (non-news):
 - "I love you" → Respond warmly, don't mention news
@@ -177,16 +180,35 @@ Keep responses under 500 words. Be helpful but not repetitive.`,
     console.log(`   Text length: ${text.length} chars`)
     
     try {
-      // Generate audio synchronously - no truncation!
       const startTime = Date.now()
-      console.log('   Calling TTS...')
-      const { audioContent } = await ttsService.generateAudio(text)
+      
+      // Check if text has multi-speaker format
+      const isMultiSpeaker = text.includes('Host:') && text.includes('Guest:')
+      
+      let audioContent
+      if (isMultiSpeaker) {
+        console.log('   🎭 Detected multi-speaker dialogue format')
+        const hostLines = (text.match(/Host:/g) || []).length
+        const guestLines = (text.match(/Guest:/g) || []).length
+        console.log(`   📊 Dialogue: ${hostLines} Host lines, ${guestLines} Guest lines`)
+        
+        const result = await multiSpeakerTTS.generateMultiSpeakerAudio(text, [
+          { name: 'Host', voice: 'Kore' },
+          { name: 'Guest', voice: 'Puck' }
+        ])
+        audioContent = result.audioContent
+      } else {
+        console.log('   🎤 Using single speaker format')
+        const result = await multiSpeakerTTS.generateSingleSpeakerAudio(text)
+        audioContent = result.audioContent
+      }
+      
       console.log(`   TTS complete in ${Date.now() - startTime}ms`)
       
       // Upload to S3
       console.log('   Uploading to S3...')
       const audioBuffer = Buffer.from(audioContent, 'base64')
-      const s3Result = await s3Service.uploadAudio(audioBuffer, assistantMsg.id)
+      const s3Result = await s3Service.uploadAudio(audioBuffer, assistantMsg.id, 'wav')
       audioUrl = s3Result.url
       
       // Update message with audio URL
