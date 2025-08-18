@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import conversationService, { type Conversation, type Message } from '../../services/conversation.service'
+import aiService from '../../services/ai.service'
 import MessageList from './MessageList'
 import MessageInput from './MessageInput'
 
@@ -10,6 +11,7 @@ const ChatInterface = () => {
     const [messages, setMessages] = useState<Message[]>([])
     const [loading, setLoading] = useState(false)
     const [sending, setSending] = useState(false)
+    const [aiStatus, setAiStatus] = useState<string>('')
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
 
@@ -51,20 +53,30 @@ const ChatInterface = () => {
             // Add user message
             const userMessage = await conversationService.addMessage(conversationId, content, 'user')
             setMessages(prev => [...prev, userMessage])
-            // TODO: In the future, this is where we'll call the AI agent
-            // For now, just add a placeholder response
-            setTimeout(async () => {
-                const assistantMessage = await conversationService.addMessage(
-                    conversationId,
-                    "I'll help you research that news topic and generate an audio summary. (This is a placeholder - AI integration coming next!)",
-                    'assistant'
-                )
-                setMessages(prev => [...prev, assistantMessage])
-            }, 1000)
+            
+            // Show AI is thinking
+            setAiStatus('🤔 Thinking...')
+            
+            // Call AI service
+            const aiResponse = await aiService.sendMessage(conversationId, content)
+            
+            // Clear status and add assistant message
+            setAiStatus('')
+            const assistantMessage: Message = {
+                id: aiResponse.messageId,
+                conversationId,
+                role: 'assistant',
+                content: aiResponse.content,
+                audioUrl: aiResponse.audioUrl || undefined,
+                createdAt: new Date().toISOString()
+            }
+            setMessages(prev => [...prev, assistantMessage])
         } catch (error) {
             console.error('Failed to send message:', error)
+            setAiStatus('')
         } finally {
             setSending(false)
+            setAiStatus('')
         }
     }
 
@@ -103,6 +115,11 @@ const ChatInterface = () => {
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto">
                 <MessageList messages={messages} />
+                {aiStatus && (
+                    <div className="px-6 py-4 text-gray-500 italic">
+                        {aiStatus}
+                    </div>
+                )}
                 <div ref={messagesEndRef} />
             </div>
 
