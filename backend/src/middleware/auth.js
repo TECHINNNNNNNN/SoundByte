@@ -5,10 +5,10 @@ export const authenticateToken = async (req, res, next) => {
     // Check for token in Authorization header first (for backward compatibility)
     const authHeader = req.headers['authorization']
     const headerToken = authHeader && authHeader.split(' ')[1]
-    
+
     // Also check for token in cookies
     const cookieToken = req.cookies?.accessToken
-    
+
     // Use header token if present, otherwise use cookie token
     const token = headerToken || cookieToken
 
@@ -28,7 +28,7 @@ export const authenticateToken = async (req, res, next) => {
         }
 
         req.user = user
-        next() // Critical: Call next() to continue to the route handler
+        next()
     } catch (error) {
         return res.status(403).json({ message: "Invalid token or expired" })
     }

@@ -15,7 +15,7 @@ export const generateAudio = async (text) => {
       input: { text },
       voice: {
         languageCode: 'en-US',
-        name: 'en-US-Journey-D', // Premium voice
+        name: 'en-US-Journey-D',
         ssmlGender: 'MALE'
       },
       audioConfig: {
@@ -25,15 +25,15 @@ export const generateAudio = async (text) => {
         volumeGainDb: 0
       }
     }
-    
+
     const [response] = await client.synthesizeSpeech(request)
-    
+
     return {
       audioContent: response.audioContent, // Base64 encoded audio
       format: 'mp3',
       duration: estimateDuration(text) // Rough estimate
     }
-    
+
   } catch (error) {
     console.error('TTS error:', error)
     throw new Error(`Failed to generate audio: ${error.message}`)
