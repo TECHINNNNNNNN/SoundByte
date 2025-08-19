@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai'
+import wav from 'wav'
 
 let ai = null
 
@@ -7,6 +8,30 @@ function getAI() {
         ai = new GoogleGenAI({})
     }
     return ai
+}
+
+/**
+ * Convert PCM data to WAV format
+ */
+async function pcmToWav(pcmData, channels = 1, sampleRate = 24000, bitDepth = 16) {
+    return new Promise((resolve, reject) => {
+        const chunks = []
+        
+        // Create WAV writer with proper format
+        const writer = new wav.Writer({
+            channels: channels,
+            sampleRate: sampleRate,
+            bitDepth: bitDepth
+        })
+        
+        writer.on('data', chunk => chunks.push(chunk))
+        writer.on('end', () => resolve(Buffer.concat(chunks)))
+        writer.on('error', reject)
+        
+        // Write PCM data and end stream
+        writer.write(pcmData)
+        writer.end()
+    })
 }
 
 export async function generateMultiSpeakerAudio(text, speakers = null) {
@@ -38,12 +63,20 @@ export async function generateMultiSpeakerAudio(text, speakers = null) {
     })
 
     const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data
-    const audioBuffer = Buffer.from(data, 'base64')
-    console.log('✅ Multi-speaker audio generated:', (audioBuffer.length / 1024).toFixed(2), 'KB')
+    if (!data) throw new Error('No audio generated')
+    
+    // Convert base64 to PCM buffer
+    const pcmBuffer = Buffer.from(data, 'base64')
+    console.log('🔊 PCM data size:', (pcmBuffer.length / 1024).toFixed(2), 'KB')
+    
+    // Convert PCM to proper WAV format
+    const wavBuffer = await pcmToWav(pcmBuffer)
+    console.log('✅ WAV file generated:', (wavBuffer.length / 1024).toFixed(2), 'KB')
     
     return {
-        audioContent: data,
-        buffer: audioBuffer
+        audioContent: wavBuffer.toString('base64'),
+        buffer: wavBuffer,
+        format: 'wav'
     }
 }
 
@@ -65,11 +98,19 @@ export async function generateSingleSpeakerAudio(text, voice = 'Kore') {
     })
 
     const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data
-    const audioBuffer = Buffer.from(data, 'base64')
-    console.log('✅ Single speaker audio generated:', (audioBuffer.length / 1024).toFixed(2), 'KB')
+    if (!data) throw new Error('No audio generated')
+    
+    // Convert base64 to PCM buffer
+    const pcmBuffer = Buffer.from(data, 'base64')
+    console.log('🔊 PCM data size:', (pcmBuffer.length / 1024).toFixed(2), 'KB')
+    
+    // Convert PCM to proper WAV format
+    const wavBuffer = await pcmToWav(pcmBuffer)
+    console.log('✅ WAV file generated:', (wavBuffer.length / 1024).toFixed(2), 'KB')
     
     return {
-        audioContent: data,
-        buffer: audioBuffer
+        audioContent: wavBuffer.toString('base64'),
+        buffer: wavBuffer,
+        format: 'wav'
     }
 }
