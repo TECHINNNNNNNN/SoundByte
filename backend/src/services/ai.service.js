@@ -8,11 +8,11 @@ import { PrismaClient } from '../../generated/prisma/index.js'
 import * as perplexityService from './perplexity.service.js'
 import * as multiSpeakerTTS from './multiSpeakerTTS.service.js'
 import * as s3Service from './s3.service.js'
-import { 
-  ENHANCED_TOOL_DESCRIPTION, 
+import {
+  ENHANCED_TOOL_DESCRIPTION,
   AUDIO_GENERATION_TOOL_DESCRIPTION,
-  ENHANCED_SYSTEM_PROMPT, 
-  CONVERSATION_STATE_PROMPT 
+  ENHANCED_SYSTEM_PROMPT,
+  CONVERSATION_STATE_PROMPT
 } from './prompts/enhanced-system-prompt.js'
 
 const prisma = new PrismaClient()
@@ -48,32 +48,32 @@ const generateAudioTool = tool({
   }),
   execute: async ({ content }) => {
     console.log(`🎵 Generating audio for message ${currentMessageId}`)
-    
+
     try {
       const isMultiSpeaker = content.includes('Host:') && content.includes('Guest:')
-      
+
       if (!isMultiSpeaker) {
         throw new Error('Content must be in Host:/Guest: dialogue format')
       }
-      
+
       // Generate the actual audio
       const { audioContent } = await multiSpeakerTTS.generateMultiSpeakerAudio(content, [
         { name: 'Host', voice: 'Kore' },
         { name: 'Guest', voice: 'Puck' }
       ])
-      
+
       // Upload to S3
       const audioBuffer = Buffer.from(audioContent, 'base64')
       const { url } = await s3Service.uploadAudio(audioBuffer, currentMessageId, 'wav')
-      
+
       // Update the message with audio URL
       await prisma.message.update({
         where: { id: currentMessageId },
         data: { audioUrl: url }
       })
-      
+
       console.log(`✅ Audio generated and saved: ${url}`)
-      return `I've created the audio podcast! You can listen to it now using the audio player above.`
+      return `I've created the audio podcast! You can listen to it now using the audio player below.`
     } catch (error) {
       console.error('❌ Audio generation failed:', error.message)
       return `Sorry, I couldn't generate the audio: ${error.message}`
@@ -172,8 +172,8 @@ export const processMessage = async (conversationId, userMessage, userId) => {
   })
 
   // Get the audio URL if it was generated
-  const audioUrl = audioGenerated ? 
-    (await prisma.message.findUnique({ where: { id: assistantMsg.id } }))?.audioUrl : 
+  const audioUrl = audioGenerated ?
+    (await prisma.message.findUnique({ where: { id: assistantMsg.id } }))?.audioUrl :
     null
 
   return {
