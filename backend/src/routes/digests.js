@@ -29,7 +29,7 @@ router.get('/', authenticateToken, async (req, res) => {
 // Create new digest
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { title, searchQuery, frequency, audioLength, deliveryEmail, useDefaultEmail } = req.body;
+    const { title, searchQuery, frequency, audioLength, deliveryEmail, useDefaultEmail, timezone, preferredHour } = req.body;
 
     // Validate required fields
     if (!title || !searchQuery || !frequency || !audioLength) {
@@ -46,14 +46,21 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid frequency' });
     }
 
+    // Validate preferred hour
+    const hour = preferredHour || 8;
+    if (hour < 0 || hour > 23) {
+      return res.status(400).json({ error: 'Preferred hour must be between 0-23' });
+    }
+
     // Check email availability
     const email = useDefaultEmail ? req.user.email : deliveryEmail;
     if (!email) {
       return res.status(400).json({ error: 'Email required. Please provide an email or enable default email.' });
     }
 
-    // Calculate next generation time
-    const nextGenerationAt = calculateNextGeneration(frequency);
+    // Calculate next generation time with timezone
+    const tz = timezone || 'UTC';
+    const nextGenerationAt = calculateNextGeneration(frequency, tz, hour);
 
     const digest = await prisma.digest.create({
       data: {
@@ -64,6 +71,8 @@ router.post('/', authenticateToken, async (req, res) => {
         audioLength,
         deliveryEmail: useDefaultEmail ? null : deliveryEmail,
         useDefaultEmail,
+        timezone: tz,
+        preferredHour: hour,
         nextGenerationAt
       }
     });
@@ -138,6 +147,23 @@ router.post('/:id/generate', authenticateToken, async (req, res) => {
   }
 });
 
+// Trigger scheduler manually (for testing)
+router.post('/trigger-scheduler', authenticateToken, async (req, res) => {
+  try {
+    const { triggerDigests } = await import('../services/scheduler.service.js');
+    const results = await triggerDigests();
+    
+    res.json({ 
+      message: 'Scheduler triggered',
+      processed: results.length,
+      results: results
+    });
+  } catch (error) {
+    console.error('Trigger scheduler error:', error);
+    res.status(500).json({ error: 'Failed to trigger scheduler' });
+  }
+});
+
 // Delete digest
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
@@ -160,26 +186,28 @@ router.delete('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// Helper function to calculate next generation time
-function calculateNextGeneration(frequency) {
+// Helper function to calculate next generation time  
+// For MVP: Store everything in UTC, handle timezone conversion on frontend
+function calculateNextGeneration(frequency, timezone = 'UTC', preferredHour = 8) {
   const now = new Date();
   const next = new Date(now);
 
   switch (frequency) {
     case 'daily':
-      next.setDate(next.getDate() + 1);
-      next.setHours(8, 0, 0, 0); // 8 AM
+      next.setUTCDate(next.getUTCDate() + 1);
       break;
     case 'weekly':
-      next.setDate(next.getDate() + (7 - next.getDay() + 1) % 7 || 7); // Next Monday
-      next.setHours(8, 0, 0, 0);
+      next.setUTCDate(next.getUTCDate() + 7);
       break;
     case 'monthly':
-      next.setMonth(next.getMonth() + 1);
-      next.setDate(1);
-      next.setHours(8, 0, 0, 0);
+      next.setUTCMonth(next.getUTCMonth() + 1);
+      next.setUTCDate(1);
       break;
   }
+
+  // Set to preferred hour (simplified for MVP)
+  // TODO: In future, use moment-timezone for accurate timezone conversion
+  next.setUTCHours(preferredHour, 0, 0, 0);
 
   return next;
 }

@@ -76,8 +76,14 @@ app.use((_req, res) => {
     res.status(404).json({ message: "Route not found" })
 })
 
+// Start scheduler
+import { startScheduler } from './services/scheduler.service.js'
+
 app.listen(PORT, () => {
     console.log(`🚀 SoundByte API running on port ${PORT}`);
     console.log(`📱 Frontend URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
     console.log(`🏥 Health check: http://localhost:${PORT}/health`);
+    
+    // Start the digest scheduler
+    startScheduler()
 })

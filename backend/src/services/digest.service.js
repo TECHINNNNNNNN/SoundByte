@@ -53,36 +53,40 @@ export async function generateDigest(digestId) {
     }
   })
   
-  // Update next generation time
-  await updateNextGeneration(digestId, digest.frequency)
+  // Update next generation time and last generated time
+  await prisma.digest.update({
+    where: { id: digestId },
+    data: { 
+      lastGeneratedAt: new Date(),
+      nextGenerationAt: getNextGenerationTime(digest.frequency, digest.timezone, digest.preferredHour)
+    }
+  })
   
   return delivery
 }
 
 /**
- * Update next generation timestamp
+ * Calculate next generation time
  */
-async function updateNextGeneration(digestId, frequency) {
+function getNextGenerationTime(frequency, timezone = 'UTC', preferredHour = 8) {
   const next = new Date()
   
   switch (frequency) {
     case 'daily':
-      next.setDate(next.getDate() + 1)
+      next.setUTCDate(next.getUTCDate() + 1)
       break
     case 'weekly':
-      next.setDate(next.getDate() + 7)
+      next.setUTCDate(next.getUTCDate() + 7)
       break
     case 'monthly':
-      next.setMonth(next.getMonth() + 1)
+      next.setUTCMonth(next.getUTCMonth() + 1)
+      next.setUTCDate(1)
       break
   }
   
-  next.setHours(8, 0, 0, 0)
+  next.setUTCHours(preferredHour, 0, 0, 0)
   
-  await prisma.digest.update({
-    where: { id: digestId },
-    data: { nextGenerationAt: next }
-  })
+  return next
 }
 
 /**
