@@ -40,8 +40,10 @@ export async function generateDigest(digestId) {
   ])
   
   // Step 4: Upload to S3
-  const filename = `digest-${digestId}-${Date.now()}.wav`
-  const uploadResult = await uploadAudio(audio.audioContent, filename)
+  const filename = `digest-${digestId}-${Date.now()}` // No extension, S3 service adds it
+  // Convert base64 to Buffer for S3 upload (same as chat audio)
+  const audioBuffer = Buffer.from(audio.audioContent, 'base64')
+  const uploadResult = await uploadAudio(audioBuffer, filename, 'wav')
   const audioUrl = uploadResult.url || uploadResult // Handle both object and string returns
   
   // Step 5: Save delivery record

@@ -78,8 +78,18 @@ function generateEmailHTML(title, transcript, audioUrl) {
       <div style="text-align: center; margin: 30px 0;">
         <a href="${audioUrl}" 
            style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-          ▶️ Play Audio Digest
+          ▶️ Download Audio Digest
         </a>
+      </div>
+      
+      <!-- Embedded Audio Player -->
+      <div style="margin: 20px 0; padding: 20px; background: #f7fafc; border-radius: 10px;">
+        <p style="color: #4a5568; font-size: 14px; margin-bottom: 10px;">Or listen directly:</p>
+        <audio controls style="width: 100%;">
+          <source src="${audioUrl}" type="audio/wav">
+          <source src="${audioUrl}" type="audio/mpeg">
+          <a href="${audioUrl}">Download audio</a>
+        </audio>
       </div>
       
       <!-- Divider -->

@@ -30,7 +30,7 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
     }
 
     const handleConversationClick = (id: string) => {
-        navigate(`/dashboard/chat/${id}`)
+        navigate(`/playground/chat/${id}`)
     }
 
     const handleDeleteConversation = async (e: React.MouseEvent, id: string) => {
@@ -40,7 +40,7 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
                 await conversationService.deleteConversation(id)
                 setConversations(conversations.filter(c => c.id !== id))
                 if (conversationId === id) {
-                    navigate('/dashboard')
+                    navigate('/playground')
                 }
             } catch (error) {
                 console.error('Failed to delete conversation:', error)

@@ -16,7 +16,7 @@ const ChatLayout = () => {
             const title = `New Chat ${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
             const conversation = await conversationService.createConversation(title)
             setRefreshTrigger(prev => prev + 1) // Trigger sidebar refresh
-            navigate(`/dashboard/chat/${conversation.id}`)
+            navigate(`/playground/chat/${conversation.id}`)
         } catch (error) {
             console.error('Failed to create conversation:', error)
         }
