@@ -3,6 +3,7 @@ import { researchNews } from './perplexity.service.js'
 import { formatAsDialogue } from './format.service.js'
 import { generateMultiSpeakerAudio } from './multiSpeakerTTS.service.js'
 import { uploadAudio } from './s3.service.js'
+import { sendDigestEmail } from './email.service.js'
 
 const prisma = new PrismaClient()
 
@@ -52,6 +53,30 @@ export async function generateDigest(digestId) {
       searchResults: research
     }
   })
+  
+  // Step 6: Send email
+  try {
+    const recipientEmail = digest.useDefaultEmail ? digest.user.email : digest.deliveryEmail
+    if (recipientEmail) {
+      await sendDigestEmail(recipientEmail, {
+        id: digestId,
+        title: digest.title,
+        transcript: dialogue
+      }, audioUrl)
+      
+      // Mark as delivered
+      await prisma.digestDelivery.update({
+        where: { id: delivery.id },
+        data: { 
+          delivered: true,
+          deliveredAt: new Date()
+        }
+      })
+    }
+  } catch (emailError) {
+    console.error('Email delivery failed:', emailError.message)
+    // Don't fail the whole process if email fails
+  }
   
   // Update next generation time and last generated time
   await prisma.digest.update({

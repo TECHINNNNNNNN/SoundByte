@@ -147,6 +147,37 @@ router.post('/:id/generate', authenticateToken, async (req, res) => {
   }
 });
 
+// Test email sending (for testing)
+router.post('/test-email', authenticateToken, async (req, res) => {
+  try {
+    const { sendDigestEmail } = await import('../services/email.service.js');
+    
+    // Create test data
+    const testDigest = {
+      id: 'test-123',
+      title: 'Test Email - AI News Daily',
+      transcript: `Two tech experts discussing AI in a modern studio.
+HOST: Welcome to today's AI digest test!
+GUEST: Thanks for having me. This is a test email to verify our email system is working.
+HOST: Everything looks great. The email delivery is functioning perfectly.
+GUEST: Indeed! Your audio digest system is ready to go.`
+    };
+    
+    const testAudioUrl = 'https://soundbyte-audio-news.s3.ap-southeast-2.amazonaws.com/test-audio.wav';
+    
+    // Send to user's email
+    await sendDigestEmail(req.user.email, testDigest, testAudioUrl);
+    
+    res.json({ 
+      message: 'Test email sent successfully',
+      to: req.user.email 
+    });
+  } catch (error) {
+    console.error('Test email error:', error);
+    res.status(500).json({ error: 'Failed to send test email: ' + error.message });
+  }
+});
+
 // Trigger scheduler manually (for testing)
 router.post('/trigger-scheduler', authenticateToken, async (req, res) => {
   try {
