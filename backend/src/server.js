@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser"
 import conversationRoutes from "./routes/conversations.js"
 import messageRoutes from "./routes/messages.js"
 import aiRoutes from "./routes/ai.routes.js"
+import digestRoutes from "./routes/digests.js"
 
 dotenv.config()
 
@@ -57,6 +58,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api/conversations", conversationRoutes)
 app.use("/api/conversations", messageRoutes)
 app.use("/api/ai", aiRoutes)
+app.use("/api/digests", digestRoutes)
 
 
 // Health check endpoint

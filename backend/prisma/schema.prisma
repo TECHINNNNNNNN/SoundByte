@@ -31,6 +31,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   conversations Conversation[] // Added: User can have many conversations
+  digests       Digest[] // User's digest subscriptions
 
   @@map("users")
 }
@@ -104,4 +105,45 @@ model Message {
 
   @@index([conversationId])
   @@map("messages")
+}
+
+// DIGEST SUBSCRIPTION MODELS
+
+model Digest {
+  id               String    @id @default(cuid())
+  userId           String
+  title            String    // User-friendly name: "AI News Daily"
+  searchQuery      String    // Query for Perplexity: "AI image generation latest news"
+  frequency        String    // "daily" | "weekly" | "monthly"
+  audioLength      Int       // 2, 5, or 10 (minutes)
+  deliveryEmail    String?   // Optional: override user's default email
+  useDefaultEmail  Boolean   @default(true) // Use account email by default
+  isActive         Boolean   @default(true)
+  nextGenerationAt DateTime? // When to generate next digest
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries       DigestDelivery[]
+
+  @@index([userId])
+  @@index([isActive, nextGenerationAt])
+  @@map("digests")
+}
+
+model DigestDelivery {
+  id            String    @id @default(cuid())
+  digestId      String
+  audioUrl      String    // S3 URL for the generated audio
+  transcript    String    @db.Text // Full text transcript
+  searchResults Json      // Raw search data from Perplexity
+  delivered     Boolean   @default(false)
+  deliveredAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  digest        Digest    @relation(fields: [digestId], references: [id], onDelete: Cascade)
+
+  @@index([digestId])
+  @@index([createdAt])
+  @@map("digest_deliveries")
 }
