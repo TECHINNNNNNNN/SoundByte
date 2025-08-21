@@ -3,6 +3,7 @@ import digestService from "../services/digest.service";
 import { useEffect, useState } from "react";
 import type { Digest } from "../services/digest.service";
 import GradientMesh from "../components/GradientMesh";
+import SoundByteIcon from "../components/SoundByteIcon";
 
 const Digest = () => {
     const { digestId } = useParams();
@@ -58,7 +59,7 @@ const Digest = () => {
     return (
         <div className="min-h-screen relative">
             <GradientMesh />
-            
+
             {/* Header Navigation */}
             <div className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -81,16 +82,16 @@ const Digest = () => {
                 <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 mb-8">
                     <div className="flex flex-col md:flex-row gap-8">
                         {/* Album Art */}
-                        <div className="w-48 h-48 md:w-64 md:h-64 rounded-2xl bg-gradient-to-br from-purple-400 via-pink-400 to-purple-600 shadow-glow flex items-center justify-center">
-                            <span className="text-white text-6xl md:text-8xl">🎧</span>
+                        <div className="w-48 h-48 md:w-64 md:h-64 rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 shadow-glow flex items-center justify-center">
+                            <SoundByteIcon size={200} animated={true} />
                         </div>
-                        
+
                         {/* Album Info */}
                         <div className="flex-1 flex flex-col justify-center">
                             <p className="text-sm font-bold text-purple-600 uppercase tracking-wide mb-2">Audio Digest</p>
                             <h1 className="text-4xl md:text-5xl font-black text-gradient mb-4">{digest.title}</h1>
                             <p className="text-lg text-gray-600 mb-6">"{digest.searchQuery}"</p>
-                            
+
                             <div className="flex flex-wrap gap-4 text-sm">
                                 <div className="flex items-center gap-2">
                                     <span className="text-gray-500">Frequency:</span>
@@ -106,11 +107,10 @@ const Digest = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-gray-500">Status:</span>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                                        digest.isActive 
-                                            ? 'bg-gradient-to-r from-green-400/20 to-emerald-400/20 text-green-700 border border-green-200'
-                                            : 'bg-gray-100/80 text-gray-600 border border-gray-200'
-                                    }`}>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${digest.isActive
+                                        ? 'bg-gradient-to-r from-green-400/20 to-emerald-400/20 text-green-700 border border-green-200'
+                                        : 'bg-gray-100/80 text-gray-600 border border-gray-200'
+                                        }`}>
                                         {digest.isActive ? 'Active' : 'Paused'}
                                     </span>
                                 </div>
@@ -122,7 +122,7 @@ const Digest = () => {
                 {/* Track List */}
                 <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Episodes</h2>
-                    
+
                     {deliveries.length === 0 ? (
                         <div className="text-center py-12">
                             <div className="text-5xl mb-4">🎵</div>
@@ -132,7 +132,7 @@ const Digest = () => {
                     ) : (
                         <div className="space-y-3">
                             {deliveries.map((delivery, index) => (
-                                <div 
+                                <div
                                     key={delivery.id}
                                     className="group flex items-center gap-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-200"
                                 >
@@ -140,15 +140,14 @@ const Digest = () => {
                                     <div className="w-10 h-10 flex items-center justify-center text-gray-400 font-bold">
                                         {String(index + 1).padStart(2, '0')}
                                     </div>
-                                    
+
                                     {/* Play Button */}
                                     <button
                                         onClick={() => setSelectedTrack(delivery.id)}
-                                        className={`w-12 h-12 rounded-full text-white flex items-center justify-center hover:shadow-glow transition-all duration-200 group-hover:scale-110 ${
-                                            selectedTrack === delivery.id 
-                                                ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
-                                                : 'bg-gradient-to-r from-purple-600 to-pink-600'
-                                        }`}
+                                        className={`w-12 h-12 rounded-full text-white flex items-center justify-center hover:shadow-glow transition-all duration-200 group-hover:scale-110 ${selectedTrack === delivery.id
+                                            ? 'bg-gradient-to-r from-green-300 to-emerald-300'
+                                            : 'bg-gradient-to-r from-purple-300 to-pink-300'
+                                            }`}
                                     >
                                         {selectedTrack === delivery.id ? (
                                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -160,7 +159,7 @@ const Digest = () => {
                                             </svg>
                                         )}
                                     </button>
-                                    
+
                                     {/* Track Info */}
                                     <div className="flex-1">
                                         <p className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors duration-200">
@@ -177,7 +176,7 @@ const Digest = () => {
                                             })}
                                         </p>
                                     </div>
-                                    
+
                                     {/* Duration */}
                                     <div className="text-sm text-gray-500">
                                         {digest.audioLength} min
@@ -186,7 +185,7 @@ const Digest = () => {
                             ))}
                         </div>
                     )}
-                    
+
                     {/* Audio Player */}
                     {selectedTrack && (
                         <div className="mt-8 pt-8 border-t border-gray-100">
@@ -206,8 +205,8 @@ const Digest = () => {
                                     </svg>
                                 </button>
                             </div>
-                            <audio 
-                                controls 
+                            <audio
+                                controls
                                 className="w-full"
                                 src={deliveries.find(d => d.id === selectedTrack)?.audioUrl}
                                 autoPlay
