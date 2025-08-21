@@ -132,20 +132,6 @@ export default function DigestDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Create Button */}
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="mb-8 w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-5 px-6 rounded-2xl font-bold text-lg hover:shadow-glow transform hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group"
-          >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              <span className="text-2xl">+</span>
-              Create New Audio Digest
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
-        )}
-
         {/* Create Form */}
         {showForm && (
           <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 mb-8">
@@ -249,8 +235,11 @@ export default function DigestDashboard() {
           </div>
         )}
 
-        {/* Digests List */}
+        {/* Digests Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* Create New Digest Card */}
+
+          {/* Existing Digests */}
           {digests.map((digest) => {
             const latestDelivery = digest.deliveries?.[0]
             const isGenerating = generatingId === digest.id
@@ -266,8 +255,8 @@ export default function DigestDashboard() {
                         toggleActive(digest)
                       }}
                       className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all duration-200 ${digest.isActive
-                          ? 'bg-gradient-to-r from-green-400/20 to-emerald-400/20 text-green-700 border border-green-200'
-                          : 'bg-gray-100/80 text-gray-600 border border-gray-200'
+                        ? 'bg-gradient-to-r from-green-400/20 to-emerald-400/20 text-green-700 border border-green-200'
+                        : 'bg-gray-100/80 text-gray-600 border border-gray-200'
                         }`}
                     >
                       {digest.isActive ? 'Active' : 'Paused'}
@@ -331,8 +320,8 @@ export default function DigestDashboard() {
                       }}
                       disabled={isGenerating}
                       className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 ${isGenerating
-                          ? 'text-gray-400 cursor-not-allowed bg-gray-50'
-                          : 'text-purple-600 hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:shadow-soft cursor-pointer'
+                        ? 'text-gray-400 cursor-not-allowed bg-gray-50'
+                        : 'text-purple-600 hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:shadow-soft cursor-pointer'
                         }`}
                     >
                       {isGenerating ? (
@@ -352,20 +341,27 @@ export default function DigestDashboard() {
               </Link>
             )
           })}
-        </div>
 
-        {digests.length === 0 && !showForm && (
-          <div className="text-center py-16 bg-white rounded-3xl shadow-lg border border-gray-100">
-            <div className="text-6xl mb-4">🎵</div>
-            <p className="text-gray-600 mb-6 text-lg">No digests yet</p>
+          {!showForm && (
             <button
               onClick={() => setShowForm(true)}
-              className="text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text hover:from-purple-700 hover:to-pink-700 font-bold text-lg transition-all duration-200"
+              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 min-h-[320px] flex flex-col items-center justify-center gap-4 hover:shadow-glow transform hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
             >
-              Create your first digest →
+              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-purple-100 to-pink-100 flex items-center justify-center group-hover:from-purple-200 group-hover:to-pink-200 transition-all duration-300">
+                <span className="text-4xl text-purple-600">+</span>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300">
+                  Create New Digest
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Set up automated audio summaries
+                </p>
+              </div>
             </button>
-          </div>
-        )}
+          )}
+        </div>
+
       </div>
     </div>
   )
