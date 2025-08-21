@@ -44,7 +44,7 @@ const Digest = () => {
     if (!digest) {
         return (
             <div className="min-h-screen flex flex-col justify-center items-center">
-                <div className="text-6xl mb-4">📭</div>
+                <SoundByteIcon size={200} animated={true} />
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Digest not found</h2>
                 <p className="text-gray-600 mb-6">This digest may have been deleted or doesn't exist.</p>
                 <button
