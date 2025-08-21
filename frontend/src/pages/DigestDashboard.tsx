@@ -248,7 +248,7 @@ export default function DigestDashboard() {
 
             return (
               <div key={digest.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 card-hover group">
-                <div 
+                <div
                   onClick={() => navigate(`/digest/${digest.id}`)}
                   className="cursor-pointer"
                 >
@@ -322,9 +322,9 @@ export default function DigestDashboard() {
                       generateNow(digest.id)
                     }}
                     disabled={isGenerating}
-                    className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 ${isGenerating
-                      ? 'text-gray-400 cursor-not-allowed bg-gray-50'
-                      : 'text-purple-600 hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:shadow-soft cursor-pointer'
+                    className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-700 ${isGenerating
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-purple-600  hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:shadow-soft cursor-pointer'
                       }`}
                   >
                     {isGenerating ? (
