@@ -45,6 +45,7 @@ const MessageComponent = ({ message }: MessageProps) => {
                                 <span className="text-sm font-medium text-gray-700">Audio Summary Available</span>
                             </div>
                             <audio controls className="w-full max-w-md">
+                                <source src={message.audioUrl} type="audio/wav" />
                                 <source src={message.audioUrl} type="audio/mpeg" />
                                 Your browser does not support the audio element.
                             </audio>
