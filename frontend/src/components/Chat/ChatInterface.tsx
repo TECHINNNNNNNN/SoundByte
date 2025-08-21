@@ -124,7 +124,7 @@ const ChatInterface = () => {
             </div>
 
             {/* Input Area */}
-            <div className="border-t bg-white">
+            <div className="bg-white">
                 <MessageInput
                     onSendMessage={handleSendMessage}
                     disabled={sending}

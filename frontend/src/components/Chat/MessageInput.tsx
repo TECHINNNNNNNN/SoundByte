@@ -36,7 +36,7 @@ const MessageInput = ({ onSendMessage, disabled = false, placeholder = "Type you
                         placeholder={placeholder}
                         disabled={disabled}
                         rows={3}
-                        className="w-full px-4 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="w-full shadow-md border border-gray-200 px-4 py-2 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-pink-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                     <p className="text-xs text-gray-400 mt-1">
                         Press Enter to send, Shift+Enter for new line
@@ -45,7 +45,7 @@ const MessageInput = ({ onSendMessage, disabled = false, placeholder = "Type you
                 <button
                     onClick={handleSend}
                     disabled={disabled || !message.trim()}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                    className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
