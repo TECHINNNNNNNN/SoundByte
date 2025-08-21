@@ -49,7 +49,7 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
     }
 
     return (
-        <div className="w-80 bg-white/95 backdrop-blur-sm h-full flex flex-col border-r border-gray-100 shadow-xl">
+        <div className="w-80 bg-white/60 backdrop-blur-lg h-full flex flex-col border-r border-gray-100 shadow-xl">
             {/* Header */}
             <div className="p-6 border-b border-gray-100">
                 <button
@@ -84,18 +84,17 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
                                 className={`
                                     group relative flex items-start p-4 rounded-xl cursor-pointer
                                     transition-all duration-200 hover:shadow-md
-                                    ${conversationId === conversation.id 
-                                        ? 'bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200' 
+                                    ${conversationId === conversation.id
+                                        ? 'bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200'
                                         : 'bg-white hover:bg-gray-50 border border-gray-100'
                                     }
                                 `}
                             >
                                 <div className="flex-1 min-w-0">
-                                    <h3 className={`text-sm font-semibold truncate ${
-                                        conversationId === conversation.id 
-                                            ? 'text-purple-700' 
+                                    <h3 className={`text-sm font-semibold truncate ${conversationId === conversation.id
+                                            ? 'text-purple-700'
                                             : 'text-gray-800 group-hover:text-purple-600'
-                                    }`}>
+                                        }`}>
                                         {conversation.title}
                                     </h3>
                                     {conversation.messages && conversation.messages[0] && (
