@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import digestService from "../services/digest.service";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import type { Digest } from "../services/digest.service";
 import GradientMesh from "../components/GradientMesh";
 
@@ -9,8 +9,7 @@ const Digest = () => {
     const navigate = useNavigate();
     const [digest, setDigest] = useState<Digest | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
-    const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
+    const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
 
     const deliveries = digest?.deliveries || [];
 
@@ -28,23 +27,6 @@ const Digest = () => {
         }
         fetchDigest();
     }, [digestId])
-
-    const handlePlayPause = (deliveryId: string) => {
-        // Pause all other audio elements
-        Object.keys(audioRefs.current).forEach(id => {
-            if (id !== deliveryId && audioRefs.current[id]) {
-                audioRefs.current[id].pause();
-            }
-        });
-        
-        if (currentlyPlaying === deliveryId) {
-            audioRefs.current[deliveryId]?.pause();
-            setCurrentlyPlaying(null);
-        } else {
-            audioRefs.current[deliveryId]?.play();
-            setCurrentlyPlaying(deliveryId);
-        }
-    };
 
     if (isLoading) {
         return (
@@ -161,12 +143,16 @@ const Digest = () => {
                                     
                                     {/* Play Button */}
                                     <button
-                                        onClick={() => handlePlayPause(delivery.id)}
-                                        className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center justify-center hover:shadow-glow transition-all duration-200 group-hover:scale-110"
+                                        onClick={() => setSelectedTrack(delivery.id)}
+                                        className={`w-12 h-12 rounded-full text-white flex items-center justify-center hover:shadow-glow transition-all duration-200 group-hover:scale-110 ${
+                                            selectedTrack === delivery.id 
+                                                ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                                                : 'bg-gradient-to-r from-purple-600 to-pink-600'
+                                        }`}
                                     >
-                                        {currentlyPlaying === delivery.id ? (
+                                        {selectedTrack === delivery.id ? (
                                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                                                <path d="M9 12l-4.463 4.969-4.537-4.969h3c0-4.97 4.03-9 9-9 2.395 0 4.565.942 6.179 2.468l-2.004 2.231c-1.081-1.05-2.553-1.699-4.175-1.699-3.309 0-6 2.691-6 6h3zm10.463-4.969l-4.463 4.969h3c0 3.309-2.691 6-6 6-1.623 0-3.094-.65-4.175-1.699l-2.004 2.231c1.613 1.526 3.784 2.468 6.179 2.468 4.97 0 9-4.03 9-9h3l-4.537-4.969z" />
                                             </svg>
                                         ) : (
                                             <svg className="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24">
@@ -196,33 +182,34 @@ const Digest = () => {
                                     <div className="text-sm text-gray-500">
                                         {digest.audioLength} min
                                     </div>
-                                    
-                                    {/* Hidden Audio Element */}
-                                    <audio
-                                        ref={el => {
-                                            if (el) audioRefs.current[delivery.id] = el;
-                                        }}
-                                        src={delivery.audioUrl}
-                                        onEnded={() => setCurrentlyPlaying(null)}
-                                        onPause={() => {
-                                            if (currentlyPlaying === delivery.id) {
-                                                setCurrentlyPlaying(null);
-                                            }
-                                        }}
-                                    />
                                 </div>
                             ))}
                         </div>
                     )}
                     
-                    {/* Full Audio Player (if there's a currently playing track) */}
-                    {currentlyPlaying && (
+                    {/* Audio Player */}
+                    {selectedTrack && (
                         <div className="mt-8 pt-8 border-t border-gray-100">
-                            <p className="text-sm text-gray-600 mb-3">Now Playing</p>
+                            <div className="flex items-center justify-between mb-3">
+                                <div>
+                                    <p className="text-sm text-gray-600">Now Playing</p>
+                                    <p className="font-semibold text-gray-900">
+                                        Episode {deliveries.findIndex(d => d.id === selectedTrack) + 1}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedTrack(null)}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
                             <audio 
                                 controls 
                                 className="w-full"
-                                src={deliveries.find(d => d.id === currentlyPlaying)?.audioUrl}
+                                src={deliveries.find(d => d.id === selectedTrack)?.audioUrl}
                                 autoPlay
                             />
                         </div>
