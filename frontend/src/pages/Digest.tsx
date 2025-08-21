@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import digestService from "../services/digest.service";
 import { useEffect, useState } from "react";
-import type { Digest } from "../services/digest.service";
+import type { Digest, DigestDelivery } from "../services/digest.service";
 import GradientMesh from "../components/GradientMesh";
 import SoundByteIcon from "../components/SoundByteIcon";
 import AudioPlayer from "../components/AudioPlayer";
@@ -12,8 +12,7 @@ const Digest = () => {
     const [digest, setDigest] = useState<Digest | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
-
-    const deliveries = digest?.deliveries || [];
+    const [deliveries, setDeliveries] = useState<DigestDelivery[]>([]);
 
     useEffect(() => {
         setIsLoading(true);
@@ -21,6 +20,7 @@ const Digest = () => {
             try {
                 const digest = await digestService.getDigest(digestId as string);
                 setDigest(digest);
+                setDeliveries(digest.deliveries || []);
             } catch (error) {
                 console.error('Failed to fetch digest:', error);
             } finally {
@@ -55,6 +55,12 @@ const Digest = () => {
                 </button>
             </div>
         );
+    }
+
+    const handleDelete = (id: string) => {
+        digestService.deleteAudio(id).then(() => {
+            setDeliveries(prev => prev.filter(delivery => delivery.id !== id));
+        })
     }
 
     return (
@@ -181,6 +187,13 @@ const Digest = () => {
                                     {/* Duration */}
                                     <div className="text-sm text-gray-500">
                                         {digest.audioLength} min
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                        <button onClick={() => handleDelete(delivery.id)} className="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
                             ))}

@@ -45,6 +45,27 @@ router.get('/:id', authenticateToken, async (req, res) => {
   }
 })
 
+router.delete('/audio/:id', authenticateToken, async (req, res) => {
+  try {
+    const delivery = await prisma.digestDelivery.findFirst({
+      where: { id: req.params.id, digest: { userId: req.user.id } }
+    })
+
+    if (!delivery) {
+      return res.status(404).json({ error: 'Delivery not found' });
+    }
+
+    await prisma.digestDelivery.delete({
+      where: { id: req.params.id }
+    })
+
+    res.json({ message: 'Audio deleted successfully' });
+  } catch (error) {
+    console.error('Delete audio error:', error);
+    res.status(500).json({ error: 'Failed to delete audio' });
+  }
+})
+
 // Create new digest
 router.post('/', authenticateToken, async (req, res) => {
   try {

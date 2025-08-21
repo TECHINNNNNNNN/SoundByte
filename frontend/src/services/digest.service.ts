@@ -67,6 +67,10 @@ class DigestService {
     })
     return data
   }
+
+  async deleteAudio(id: string): Promise<void> {
+    await api.delete(`/digests/audio/${id}`)
+  }
 }
 
 export default new DigestService()
