@@ -19,14 +19,14 @@ const transporter = nodemailer.createTransport({
  */
 export async function sendDigestEmail(email, digest, audioUrl) {
   const html = generateEmailHTML(digest.title, digest.transcript, audioUrl)
-  
+
   const info = await transporter.sendMail({
     from: `"SoundByte 🎧" <${process.env.SMTP_USER}>`,
     to: email,
     subject: `🎙️ ${digest.title} - Your Audio Digest is Ready!`,
     html
   })
-  
+
   console.log(`📧 Email sent to ${email}: ${info.messageId}`)
   return info
 }
@@ -37,7 +37,7 @@ export async function sendDigestEmail(email, digest, audioUrl) {
 function generateEmailHTML(title, transcript, audioUrl) {
   // Extract first paragraph for preview
   const preview = transcript.split('\n')[2]?.slice(0, 150) || ''
-  
+
   return `
 <!DOCTYPE html>
 <html>
@@ -94,18 +94,6 @@ function generateEmailHTML(title, transcript, audioUrl) {
       
       <!-- Divider -->
       <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
-      
-      <!-- Transcript Section -->
-      <details style="margin: 20px 0;">
-        <summary style="cursor: pointer; color: #4a5568; font-weight: 600; padding: 10px 0;">
-          📝 View Full Transcript
-        </summary>
-        <div style="margin-top: 20px; padding: 20px; background: #f7fafc; border-radius: 10px;">
-          <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: 14px; line-height: 1.6; color: #2d3748; margin: 0;">
-${transcript}
-          </pre>
-        </div>
-      </details>
       
       <!-- Footer Links -->
       <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
