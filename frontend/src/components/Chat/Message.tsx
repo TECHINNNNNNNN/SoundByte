@@ -1,6 +1,6 @@
 
-
 import { type Message } from '../../services/conversation.service'
+import AudioPlayer from '../AudioPlayer'
 
 interface MessageProps {
     message: Message
@@ -39,21 +39,13 @@ const MessageComponent = ({ message }: MessageProps) => {
 
                     {/* Audio Player (if audio exists) */}
                     {message.audioUrl && (
-                        <div className="mt-2 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="text-purple-600">🎧</span>
-                                <span className="text-sm font-medium text-gray-700">Audio Summary Available</span>
-                            </div>
-                            <audio controls className="w-full max-w-md">
-                                <source src={message.audioUrl} type="audio/wav" />
-                                <source src={message.audioUrl} type="audio/mpeg" />
-                                Your browser does not support the audio element.
-                            </audio>
-                            {message.audioDuration && (
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Duration: {Math.floor(message.audioDuration / 60)}:{(message.audioDuration % 60).toString().padStart(2, '0')}
-                                </p>
-                            )}
+                        <div className="mt-3 max-w-md">
+                            <AudioPlayer
+                                src={message.audioUrl}
+                                title="Audio Summary"
+                                subtitle={message.audioDuration ? `Duration: ${Math.floor(message.audioDuration / 60)}:${(message.audioDuration % 60).toString().padStart(2, '0')}` : undefined}
+                                variant="mini"
+                            />
                         </div>
                     )}
 

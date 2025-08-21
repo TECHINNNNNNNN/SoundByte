@@ -53,18 +53,18 @@ const ChatInterface = () => {
             // Add user message
             const userMessage = await conversationService.addMessage(conversationId, content, 'user')
             setMessages(prev => [...prev, userMessage])
-            
+
             // Show AI is working
-            const isNewsQuery = content.toLowerCase().includes('news') || 
-                               content.toLowerCase().includes('latest') ||
-                               content.toLowerCase().includes('today')
-            setAiStatus(isNewsQuery 
+            const isNewsQuery = content.toLowerCase().includes('news') ||
+                content.toLowerCase().includes('latest') ||
+                content.toLowerCase().includes('today')
+            setAiStatus(isNewsQuery
                 ? '🔍 Researching news and generating audio... (this may take a minute)'
                 : '💭 Generating response...')
-            
+
             // Call AI service
             const aiResponse = await aiService.sendMessage(conversationId, content)
-            
+
             // Clear status and add assistant message
             setAiStatus('')
             const assistantMessage: Message = {
@@ -111,12 +111,6 @@ const ChatInterface = () => {
 
     return (
         <div className="h-full flex flex-col">
-            {/* Chat Header */}
-            <div className="bg-white border-b px-6 py-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                    {conversation.title}
-                </h2>
-            </div>
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto">
@@ -130,7 +124,7 @@ const ChatInterface = () => {
             </div>
 
             {/* Input Area */}
-            <div className="border-t bg-white">
+            <div className="bg-white">
                 <MessageInput
                     onSendMessage={handleSendMessage}
                     disabled={sending}
