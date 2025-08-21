@@ -1,6 +1,7 @@
 import { useAuth } from '../context/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 import GradientMesh from '../components/GradientMesh'
+import SoundByteIcon from '../components/SoundByteIcon'
 
 const Dashboard = () => {
   const { user, logout } = useAuth()
@@ -20,7 +21,7 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <h1 className="text-3xl font-black text-gradient flex items-center gap-3">
-              <span className="text-4xl animate-pulse">🎧</span>
+              <SoundByteIcon size={48} animated={true} />
               SoundByte
             </h1>
             <div className="flex items-center space-x-4">

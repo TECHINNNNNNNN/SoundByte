@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import digestService, { type Digest, type CreateDigestDto } from '../services/digest.service'
 import GradientMesh from '../components/GradientMesh'
+import SoundByteIcon from '../components/SoundByteIcon'
 
 export default function DigestDashboard() {
   const [digests, setDigests] = useState<Digest[]>([])
@@ -106,11 +107,11 @@ export default function DigestDashboard() {
     <div className="min-h-screen relative">
       <GradientMesh />
       {/* Header */}
-      <div className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+      <div className="bg-white/20 backdrop-blur-3xl border-gray-100 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-2">
+          <div className="flex justify-between items-center py-2">
             <h1 className="text-3xl font-black text-gradient flex items-center gap-3">
-              <span className="text-4xl animate-pulse">🎧</span>
+              <SoundByteIcon size={100} animated={true} />
               SoundByte
             </h1>
             <div className="flex space-x-4">
