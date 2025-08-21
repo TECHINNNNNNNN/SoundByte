@@ -41,6 +41,11 @@ class DigestService {
     return data
   }
 
+  async getDigest(id: string): Promise<Digest> {
+    const { data } = await api.get<Digest>(`/digests/${id}`)
+    return data
+  }
+
   async createDigest(digest: CreateDigestDto): Promise<Digest> {
     const { data } = await api.post<Digest>('/digests', digest)
     return data

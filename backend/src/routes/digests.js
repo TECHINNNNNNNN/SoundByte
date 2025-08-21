@@ -26,6 +26,25 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
+// Get digest by id
+router.get('/:id', authenticateToken, async (req, res) => {
+  try {
+    const digest = await prisma.digest.findFirst({
+      where: { id: req.params.id, userId: req.user.id },
+      include: {
+        _count: { select: { deliveries: true } },
+        deliveries: {
+          orderBy: { createdAt: 'desc' }
+        }
+      }
+    })
+    res.json(digest);
+  } catch (error) {
+    console.error('Get digest error:', error);
+    res.status(500).json({ error: 'Failed to fetch digest' });
+  }
+})
+
 // Create new digest
 router.post('/', authenticateToken, async (req, res) => {
   try {
@@ -127,19 +146,19 @@ router.post('/:id/generate', authenticateToken, async (req, res) => {
     const digest = await prisma.digest.findFirst({
       where: { id: req.params.id, userId: req.user.id }
     });
-    
+
     if (!digest) {
       return res.status(404).json({ error: 'Digest not found' });
     }
-    
+
     // Import dynamically to avoid circular dependencies
     const { generateDigest } = await import('../services/digest.service.js');
     const delivery = await generateDigest(digest.id);
-    
-    res.json({ 
+
+    res.json({
       message: 'Digest generated successfully',
       audioUrl: delivery.audioUrl,
-      deliveryId: delivery.id 
+      deliveryId: delivery.id
     });
   } catch (error) {
     console.error('Generate digest error:', error);
@@ -151,7 +170,7 @@ router.post('/:id/generate', authenticateToken, async (req, res) => {
 router.post('/test-email', authenticateToken, async (req, res) => {
   try {
     const { sendDigestEmail } = await import('../services/email.service.js');
-    
+
     // Create test data
     const testDigest = {
       id: 'test-123',
@@ -162,15 +181,15 @@ GUEST: Thanks for having me. This is a test email to verify our email system is 
 HOST: Everything looks great. The email delivery is functioning perfectly.
 GUEST: Indeed! Your audio digest system is ready to go.`
     };
-    
+
     const testAudioUrl = 'https://soundbyte-audio-news.s3.ap-southeast-2.amazonaws.com/test-audio.wav';
-    
+
     // Send to user's email
     await sendDigestEmail(req.user.email, testDigest, testAudioUrl);
-    
-    res.json({ 
+
+    res.json({
       message: 'Test email sent successfully',
-      to: req.user.email 
+      to: req.user.email
     });
   } catch (error) {
     console.error('Test email error:', error);
@@ -183,8 +202,8 @@ router.post('/trigger-scheduler', authenticateToken, async (req, res) => {
   try {
     const { triggerDigests } = await import('../services/scheduler.service.js');
     const results = await triggerDigests();
-    
-    res.json({ 
+
+    res.json({
       message: 'Scheduler triggered',
       processed: results.length,
       results: results

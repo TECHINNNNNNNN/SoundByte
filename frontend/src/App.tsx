@@ -9,6 +9,7 @@ import Profile from './pages/Profile'
 import DigestDashboard from './pages/DigestDashboard'
 import ChatLayout from './components/Layout/ChatLayout'
 import ChatInterface from './components/Chat/ChatInterface'
+import Digest from './pages/Digest'
 import './index.css'
 
 function App() {
@@ -26,13 +27,14 @@ function App() {
           <Route element={<ProtectedRoute />}>
             {/* Main digest dashboard */}
             <Route path="/dashboard" element={<DigestDashboard />} />
-            
+            <Route path="/digest/:digestId" element={<Digest />} />
+
             {/* Playground - existing chat interface */}
             <Route path="/playground" element={<ChatLayout />}>
               <Route index element={<ChatInterface />} />
               <Route path="chat/:conversationId" element={<ChatInterface />} />
             </Route>
-            
+
             <Route path="/profile" element={<Profile />} />
           </Route>
 
