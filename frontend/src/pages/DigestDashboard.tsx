@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import digestService, { type Digest, type CreateDigestDto } from '../services/digest.service'
 import GradientMesh from '../components/GradientMesh'
 import SoundByteIcon from '../components/SoundByteIcon'
+import AudioPlayer from '../components/AudioPlayer'
 
 export default function DigestDashboard() {
   const [digests, setDigests] = useState<Digest[]>([])
@@ -107,7 +108,7 @@ export default function DigestDashboard() {
     <div className="min-h-screen relative">
       <GradientMesh />
       {/* Header */}
-      <div className="bg-white/20 backdrop-blur-3xl border-gray-100 sticky top-0 z-40">
+      <div className="backdrop-blur-3xl border-gray-100 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-2">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-black text-gradient flex items-center gap-3">
@@ -246,13 +247,16 @@ export default function DigestDashboard() {
             const isGenerating = generatingId === digest.id
 
             return (
-              <Link to={`/digest/${digest.id}`} key={digest.id}>
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 card-hover group">
+              <div key={digest.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 card-hover group">
+                <div 
+                  onClick={() => navigate(`/digest/${digest.id}`)}
+                  className="cursor-pointer"
+                >
                   <div className="flex justify-between items-start mb-4">
                     <h3 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300">{digest.title}</h3>
                     <button
                       onClick={(e) => {
-                        e.preventDefault()
+                        e.stopPropagation()
                         toggleActive(digest)
                       }}
                       className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all duration-200 ${digest.isActive
@@ -288,58 +292,55 @@ export default function DigestDashboard() {
                       <span className="font-medium">{digest._count?.deliveries || 0}</span>
                     </div>
                   </div>
-
-                  {/* Audio Player for Latest Delivery */}
-                  {latestDelivery && latestDelivery.audioUrl && (
-                    <div className="mt-4 p-3 bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-xl border border-purple-100">
-                      <p className="text-xs text-gray-600 mb-2">Latest audio:</p>
-                      <audio controls className="w-full">
-                        <source src={latestDelivery.audioUrl} type="audio/wav" />
-                        <source src={latestDelivery.audioUrl} type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                      </audio>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Generated: {new Date(latestDelivery.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault()
-                        deleteDigest(digest.id)
-                      }}
-                      className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors duration-200"
-                    >
-                      Delete
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault()
-                        generateNow(digest.id)
-                      }}
-                      disabled={isGenerating}
-                      className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 ${isGenerating
-                        ? 'text-gray-400 cursor-not-allowed bg-gray-50'
-                        : 'text-purple-600 hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:shadow-soft cursor-pointer'
-                        }`}
-                    >
-                      {isGenerating ? (
-                        <span className="flex items-center">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Generating...
-                        </span>
-                      ) : (
-                        'Generate Now'
-                      )}
-                    </button>
-                  </div>
                 </div>
-              </Link>
+
+                {/* Audio Player for Latest Delivery - Outside clickable area */}
+                {latestDelivery && latestDelivery.audioUrl && (
+                  <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+                    <AudioPlayer
+                      src={latestDelivery.audioUrl}
+                      title="Latest Episode"
+                      subtitle={`Generated: ${new Date(latestDelivery.createdAt).toLocaleDateString()}`}
+                      variant="compact"
+                    />
+                  </div>
+                )}
+
+                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteDigest(digest.id)
+                    }}
+                    className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors duration-200"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      generateNow(digest.id)
+                    }}
+                    disabled={isGenerating}
+                    className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 ${isGenerating
+                      ? 'text-gray-400 cursor-not-allowed bg-gray-50'
+                      : 'text-purple-600 hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:shadow-soft cursor-pointer'
+                      }`}
+                  >
+                    {isGenerating ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                      </span>
+                    ) : (
+                      'Generate Now'
+                    )}
+                  </button>
+                </div>
+              </div>
             )
           })}
 
