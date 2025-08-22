@@ -10,6 +10,8 @@ import DigestDashboard from './pages/DigestDashboard'
 import ChatLayout from './components/Layout/ChatLayout'
 import ChatInterface from './components/Chat/ChatInterface'
 import Digest from './pages/Digest'
+import PaymentSuccess from './pages/Payment/Success'
+import PaymentCanceled from './pages/Payment/Canceled'
 import './index.css'
 
 function App() {
@@ -36,6 +38,10 @@ function App() {
             </Route>
 
             <Route path="/profile" element={<Profile />} />
+            
+            {/* Payment routes */}
+            <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/payment/canceled" element={<PaymentCanceled />} />
           </Route>
 
           {/* Catch all - redirect to home */}

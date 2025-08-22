@@ -11,6 +11,8 @@ import conversationRoutes from "./routes/conversations.js"
 import messageRoutes from "./routes/messages.js"
 import aiRoutes from "./routes/ai.routes.js"
 import digestRoutes from "./routes/digests.js"
+import paymentRoutes from "./routes/payments.js"
+import webhookRoutes from "./routes/webhooks.js"
 
 dotenv.config()
 
@@ -27,6 +29,9 @@ const limiter = rateLimit({
 })
 
 app.use(limiter)
+
+// Webhook routes MUST come before body parsing middleware
+app.use("/api/webhooks", webhookRoutes)
 
 // Middleware
 app.use(cors({
@@ -59,6 +64,7 @@ app.use("/api/conversations", conversationRoutes)
 app.use("/api/conversations", messageRoutes)
 app.use("/api/ai", aiRoutes)
 app.use("/api/digests", digestRoutes)
+app.use("/api/payments", paymentRoutes)
 
 
 // Health check endpoint
