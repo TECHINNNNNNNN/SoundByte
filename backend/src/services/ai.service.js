@@ -123,7 +123,7 @@ export const processMessage = async (conversationId, userMessage, userId) => {
 
   // 4. Generate response with tools (not streaming for reliability)
   const result = await generateText({
-    model: openai('gpt-4o'),
+    model: openai('gpt-5'),
     system: ENHANCED_SYSTEM_PROMPT + CONVERSATION_STATE_PROMPT,
     messages: [
       ...conversation.messages.map(m => ({
