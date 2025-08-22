@@ -118,13 +118,13 @@ export default function DigestDashboard() {
             <div className="flex space-x-4">
               <button
                 onClick={() => navigate('/playground')}
-                className="px-6 py-2.5 text-purple-700 font-medium rounded-full bg-purple-50 transition-all duration-200 hover:shadow-glow hover:scale-[1.02] transform"
+                className="px-6 py-2.5 text-purple-700 font-medium rounded-full bg-purple-50 transition-all duration-200 hover:shadow-glow hover:scale-[1.02] transform cursor-pointer"
               >
                 Playground
               </button>
               <button
                 onClick={() => navigate('/profile')}
-                className="px-6 py-2.5 text-gray-700 font-medium rounded-full bg-pink-50 transition-all duration-200 hover:shadow-glow hover:scale-[1.02] transform"
+                className="px-6 py-2.5 text-gray-700 font-medium rounded-full bg-pink-50 transition-all duration-200 hover:shadow-glow hover:scale-[1.02] transform cursor-pointer"
               >
                 Profile
               </button>
