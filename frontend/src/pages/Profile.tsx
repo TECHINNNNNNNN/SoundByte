@@ -9,28 +9,26 @@ import { createCheckoutSession, createPortalSession } from '../services/stripe'
 const Profile = () => {
   const { user } = useAuth()
   const location = useLocation()
-  const { 
-    isLoading, 
-    hasSubscription, 
-    remainingTokens, 
-    tokenLimit, 
+  const {
+    isLoading,
+    hasSubscription,
+    remainingTokens,
+    tokenLimit,
     percentageUsed,
-    refetch 
+    refetch
   } = useSubscription()
   console.log(hasSubscription)
-  
+
   // Refresh subscription data when returning from payment
   useEffect(() => {
     // Check if we're coming back from a successful payment
     const params = new URLSearchParams(location.search)
     if (params.get('payment') === 'success' || params.get('session_id')) {
       // Wait a moment for webhooks to process, then refresh
-      setTimeout(() => {
-        refetch()
-      }, 2000)
+      refetch()
     }
-  }, [location, refetch])
-  
+  }, [location])
+
   const handleUpgrade = async () => {
     try {
       const checkoutUrl = await createCheckoutSession()
@@ -40,7 +38,7 @@ const Profile = () => {
       alert('Failed to start checkout. Please try again.')
     }
   }
-  
+
   const handleManageSubscription = async () => {
     try {
       const portalUrl = await createPortalSession()
@@ -118,7 +116,7 @@ const Profile = () => {
             {/* Subscription Section */}
             <div className="mt-6 pt-6 border-t border-white/20">
               <h3 className="text-lg font-semibold mb-4">Subscription</h3>
-              
+
               {isLoading ? (
                 <p className="text-gray-600">Loading subscription data...</p>
               ) : (
@@ -130,7 +128,7 @@ const Profile = () => {
                       {hasSubscription ? 'Pro (Active)' : 'Free'}
                     </span>
                   </div>
-                  
+
                   {/* Token Usage */}
                   <div>
                     <div className="flex justify-between items-center mb-2">
@@ -139,36 +137,35 @@ const Profile = () => {
                         {tokenLimit - remainingTokens} / {tokenLimit} tokens
                       </span>
                     </div>
-                    
+
                     {/* Progress Bar */}
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full transition-all ${
-                          percentageUsed > 80 ? 'bg-red-500' : 
+                      <div
+                        className={`h-2 rounded-full transition-all ${percentageUsed > 80 ? 'bg-red-500' :
                           percentageUsed > 50 ? 'bg-yellow-500' : 'bg-green-500'
-                        }`}
+                          }`}
                         style={{ width: `${Math.min(percentageUsed, 100)}%` }}
                       />
                     </div>
-                    
+
                     {percentageUsed > 80 && (
                       <p className="text-sm text-red-600 mt-1">
                         Warning: You've used {percentageUsed}% of your monthly tokens
                       </p>
                     )}
                   </div>
-                  
+
                   {/* Action Button */}
                   <div className="pt-4">
                     {hasSubscription ? (
-                      <button 
+                      <button
                         onClick={handleManageSubscription}
                         className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:shadow-glow hover:scale-[1.02] transform cursor-pointer transition"
                       >
                         Manage Subscription
                       </button>
                     ) : (
-                      <button 
+                      <button
                         onClick={handleUpgrade}
                         className="bg-pink-600 text-white px-4 py-2 rounded-xl hover:shadow-glow hover:scale-[1.02] transform cursor-pointer transition"
                       >
@@ -179,7 +176,7 @@ const Profile = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Actions */}
             <div className="mt-6 pt-6 border-t border-white/20">
               <button className="bg-gray-500 text-white px-4 py-2 rounded-xl hover:shadow-glow hover:scale-[1.02] transform cursor-pointer transition">
