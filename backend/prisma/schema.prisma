@@ -32,7 +32,12 @@ model User {
   sessions      Session[]
   conversations Conversation[] // Added: User can have many conversations
   digests       Digest[] // User's digest subscriptions
-
+  
+  // Stripe & Billing
+  stripeCustomerId  String?      @unique
+  subscription      Subscription?
+  usage             Usage?
+  
   @@map("users")
 }
 
@@ -149,4 +154,53 @@ model DigestDelivery {
   @@index([digestId])
   @@index([createdAt])
   @@map("digest_deliveries")
+}
+
+// STRIPE & BILLING MODELS
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  stripeSubscriptionId String   @unique
+  stripePriceId        String
+  status               String   // active, canceled, past_due, trialing
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Usage {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  period      String   // YYYY-MM format
+  tokens      Int      @default(0)
+  tokenLimit  Int      @default(500000) // 500K tokens per month
+  extraTokens Int      @default(0) // Additional purchased tokens
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, period])
+  @@index([period])
+  @@map("usage")
+}
+
+// Track Stripe webhook events for idempotency
+model WebhookEvent {
+  id              String   @id @default(cuid())
+  stripeEventId   String   @unique
+  type            String
+  processed       Boolean  @default(false)
+  error           String?
+  createdAt       DateTime @default(now())
+  
+  @@index([type, processed])
+  @@map("webhook_events")
 }
