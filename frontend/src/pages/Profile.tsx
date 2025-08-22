@@ -13,7 +13,9 @@ const Profile = () => {
       <nav className="">
         <div className="container mx-auto px-16">
           <div className="flex justify-between items-center">
-            <SoundByteIcon size={100} animated={true} />
+            <Link to="/dashboard">
+              <SoundByteIcon size={100} animated={true} />
+            </Link>
             <Link
               to="/dashboard"
               className="text-gray-600 bg-pink-100 px-4 py-2 rounded-xl hover:shadow-glow hover:scale-[1.02] transform cursor-pointer transition"
