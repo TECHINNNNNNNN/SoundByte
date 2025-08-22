@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import SoundByteIcon from '../components/SoundByteIcon'
 import GradientMesh from '../components/GradientMesh'
 import { useSubscription } from '../hooks/useSubscription'
@@ -7,13 +8,28 @@ import { createCheckoutSession, createPortalSession } from '../services/stripe'
 
 const Profile = () => {
   const { user } = useAuth()
+  const location = useLocation()
   const { 
     isLoading, 
     hasSubscription, 
     remainingTokens, 
     tokenLimit, 
-    percentageUsed 
+    percentageUsed,
+    refetch 
   } = useSubscription()
+  console.log(hasSubscription)
+  
+  // Refresh subscription data when returning from payment
+  useEffect(() => {
+    // Check if we're coming back from a successful payment
+    const params = new URLSearchParams(location.search)
+    if (params.get('payment') === 'success' || params.get('session_id')) {
+      // Wait a moment for webhooks to process, then refresh
+      setTimeout(() => {
+        refetch()
+      }, 2000)
+    }
+  }, [location, refetch])
   
   const handleUpgrade = async () => {
     try {

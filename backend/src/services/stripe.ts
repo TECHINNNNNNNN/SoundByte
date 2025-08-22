@@ -3,6 +3,17 @@ import { PrismaClient } from '../../generated/prisma/index.js'
 
 const prisma = new PrismaClient();
 
+// Extended type for subscription with items
+interface ExtendedSubscription extends Stripe.Subscription {
+  current_period_end?: number;
+  items?: {
+    data: Array<{
+      current_period_end?: number;
+      price: Stripe.Price;
+    }>;
+  };
+}
+
 // Initialize Stripe - latest API version as of Aug 2025
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-07-30.basil',
@@ -70,8 +81,9 @@ export async function createCheckoutSession(
     cancel_url: cancelUrl,
     metadata: { userId },
     subscription_data: {
-      metadata: { userId }
-    }
+      metadata: { userId }  // Ensures userId is ALWAYS in subscription metadata
+    },
+    client_reference_id: userId  // Backup reference
   });
 }
 
@@ -97,17 +109,19 @@ export async function createPortalSession(userId: string, returnUrl: string) {
 /**
  * Handle subscription updates from webhooks
  */
-export async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
+export async function handleSubscriptionUpdate(subscription: ExtendedSubscription) {
   const userId = subscription.metadata.userId;
   if (!userId) {
     console.log('No userId in subscription metadata:', subscription.id);
     return;
   }
 
-  // Ensure we have a valid timestamp
-  const periodEnd = (subscription as any).current_period_end;
+  // Get period end from subscription (check both possible locations)
+  const periodEnd = subscription.current_period_end || 
+                    subscription.items?.data?.[0]?.current_period_end;
+  
   if (!periodEnd) {
-    console.error('No current_period_end in subscription:', subscription.id);
+    console.error('No current_period_end found in subscription:', subscription.id);
     return;
   }
 
@@ -151,6 +165,13 @@ export async function hasActiveSubscription(userId: string): Promise<boolean> {
   const subscription = await prisma.subscription.findUnique({
     where: { userId },
     select: { status: true, currentPeriodEnd: true }
+  });
+  
+  console.log('Database subscription check:', { 
+    userId, 
+    subscription,
+    isActive: subscription?.status === 'active',
+    isCurrent: subscription?.currentPeriodEnd ? subscription.currentPeriodEnd > new Date() : false
   });
 
   return subscription?.status === 'active' &&

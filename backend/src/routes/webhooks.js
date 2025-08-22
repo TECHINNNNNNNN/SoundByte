@@ -56,6 +56,24 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
+        console.log('Processing subscription:', {
+          id: subscription.id,
+          customer: subscription.customer,
+          metadata: subscription.metadata,
+          status: subscription.status
+        });
+        
+        // If no userId in metadata, try to find it from the customer
+        if (!subscription.metadata?.userId && subscription.customer) {
+          const user = await prisma.user.findFirst({
+            where: { stripeCustomerId: subscription.customer }
+          });
+          if (user) {
+            subscription.metadata = { ...subscription.metadata, userId: user.id };
+            console.log('Found userId from customer:', user.id);
+          }
+        }
+        
         await handleSubscriptionUpdate(subscription);
         console.log('Subscription updated:', subscription.id);
         break;

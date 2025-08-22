@@ -5,9 +5,9 @@ const PaymentSuccess = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to profile after 3 seconds
+    // Redirect to profile after 3 seconds with success flag
     const timer = setTimeout(() => {
-      navigate('/profile');
+      navigate('/profile?payment=success');
     }, 3000);
 
     return () => clearTimeout(timer);

@@ -53,9 +53,12 @@ router.post('/create-portal-session', authenticateToken, async (req, res) => {
 router.get('/subscription-status', authenticateToken, async (req, res) => {
   try {
     const { id: userId } = req.user;
+    console.log('Checking subscription for user:', userId);
 
     const hasSubscription = await stripeService.hasActiveSubscription(userId);
     const remainingTokens = await stripeService.getRemainingTokens(userId);
+    
+    console.log('Subscription status:', { userId, hasSubscription, remainingTokens });
 
     res.json({
       hasSubscription,
