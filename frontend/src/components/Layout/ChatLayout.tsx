@@ -4,6 +4,7 @@ import Sidebar from './Sidebar'
 import { useAuth } from '../../context/AuthContext'
 import conversationService from '../../services/conversation.service'
 import GradientMesh from '../GradientMesh'
+import SoundByteIcon from '../SoundByteIcon'
 
 const ChatLayout = () => {
     const { user, logout } = useAuth()
@@ -31,29 +32,29 @@ const ChatLayout = () => {
     return (
         <div className="h-screen flex flex-col relative">
             <GradientMesh />
-            
+
             {/* Top Navigation Bar */}
             <nav className="bg-white/95 backdrop-blur-md border-b border-gray-100 h-16 flex items-center px-4 shadow-sm relative z-50">
                 <div className="flex items-center justify-between w-full max-w-full">
                     <div className="flex items-center space-x-4">
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="p-2.5 hover:bg-purple-50 rounded-xl transition-all duration-200 group"
+                            className="p-2.5 hover:bg-purple-50 rounded-xl transition-all duration-200 group cursor-pointer"
                         >
                             <svg className="w-6 h-6 text-gray-600 group-hover:text-purple-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
-                        <h1 className="text-2xl font-black text-gradient flex items-center gap-2">
-                            <span className="text-3xl animate-pulse">💬</span>
+                        <h1 className="text-2xl font-black text-gradient flex items-center">
                             Playground
                         </h1>
+                        <SoundByteIcon size={75} animated={true} />
                     </div>
 
                     <div className="flex items-center space-x-4">
                         <button
                             onClick={() => navigate('/dashboard')}
-                            className="px-4 py-2 text-purple-700 font-medium rounded-full hover:bg-purple-50 transition-all duration-200 text-sm"
+                            className="px-4 py-2 text-purple-700 font-medium rounded-full bg-purple-50 transition-all duration-200 text-sm hover:shadow-glow hover:scale-[1.02] transform cursor-pointer"
                         >
                             ← Back to Digests
                         </button>
@@ -64,7 +65,7 @@ const ChatLayout = () => {
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full font-medium hover:shadow-glow transition-all duration-200 text-sm"
+                            className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full font-medium hover:shadow-glow transition-all duration-200 text-sm hover:scale-[1.02] transform cursor-pointer"
                         >
                             Logout
                         </button>
