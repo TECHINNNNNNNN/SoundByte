@@ -7,7 +7,7 @@ const Profile = () => {
   const { user } = useAuth()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen relative">
       <GradientMesh />
       {/* Navigation */}
       <nav className="">
@@ -27,7 +27,17 @@ const Profile = () => {
       {/* Profile Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white/25 backdrop-blur-3xl rounded-2xl shadow p-6">
+          {/* Glassmorphism card container
+             PURPOSE: Creates a translucent, blurred card with soft borders and subtle shadows
+             UX: Adds macOS-style traffic light dots at the top-right for familiar OS chrome
+             NOTE: Uses only Tailwind utilities and our custom shadow helpers for compatibility */}
+          <div className="relative rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 ring-1 ring-white/10 shadow-soft p-8 card-hover">
+            {/* macOS-style traffic lights (top-right as requested) */}
+            <div className="absolute top-4 right-4 flex items-center gap-2 select-none">
+              <span className="w-3 h-3 rounded-full bg-[#ff5f56] ring-1 ring-white/40" aria-hidden="true"></span>
+              <span className="w-3 h-3 rounded-full bg-[#ffbd2e] ring-1 ring-white/40" aria-hidden="true"></span>
+              <span className="w-3 h-3 rounded-full bg-[#27c93f] ring-1 ring-white/40" aria-hidden="true"></span>
+            </div>
             <h2 className="text-2xl font-semibold mb-6">Your Profile</h2>
 
             {/* Avatar */}
@@ -59,8 +69,8 @@ const Profile = () => {
             </div>
 
             {/* Actions */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <button className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 cursor-pointer transition">
+            <div className="mt-6 pt-6 border-t border-white/20">
+              <button className="bg-pink-600 text-white px-4 py-2 rounded-xl hover:shadow-glow hover:scale-[1.02] transform cursor-pointer transition">
                 Edit Profile
               </button>
             </div>
