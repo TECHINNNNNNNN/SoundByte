@@ -1,6 +1,6 @@
 
-import { Send } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react'
+import { Banana } from 'lucide-react';
 
 interface MessageInputProps {
     onSendMessage: (message: string) => void
@@ -47,7 +47,7 @@ const MessageInput = ({ onSendMessage, disabled = false, placeholder = "Type you
                     disabled={disabled || !message.trim()}
                     className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition absolute right-6"
                 >
-                    <Send className="w-5 h-5" />
+                    <Banana className="size-5" />
                 </button>
             </div>
         </div>
