@@ -72,7 +72,7 @@ const Profile = () => {
       {/* Profile Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <div className="relative rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 ring-1 ring-white/10 shadow-soft p-8 card-hover">
+          <div className="relative rounded-2xl bg-gray-50 backdrop-blur-xl border border-white/20 ring-1 ring-white/10 shadow-soft p-8 card-hover">
             <div className="absolute top-4 right-4 flex items-center gap-2 select-none">
               <span className="w-3 h-3 rounded-full bg-[#ff5f56] ring-1 ring-white/40" aria-hidden="true"></span>
               <span className="w-3 h-3 rounded-full bg-[#ffbd2e] ring-1 ring-white/40" aria-hidden="true"></span>
