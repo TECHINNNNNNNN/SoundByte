@@ -76,10 +76,15 @@ const ChatInterface = () => {
                 createdAt: new Date().toISOString()
             }
             setMessages(prev => [...prev, assistantMessage])
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to send message:', error)
-            setAiStatus('❌ Something went wrong. Please try again.')
-            setTimeout(() => setAiStatus(''), 3000)
+            // Handle token limit errors
+            if (error.response?.status === 403) {
+                setAiStatus(`⚠️ ${error.response.data.error}`)
+            } else {
+                setAiStatus('❌ Something went wrong. Please try again.')
+            }
+            setTimeout(() => setAiStatus(''), 5000)
         } finally {
             setSending(false)
             setAiStatus('')
