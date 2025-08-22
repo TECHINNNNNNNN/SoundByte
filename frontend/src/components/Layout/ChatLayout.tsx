@@ -4,6 +4,7 @@ import Sidebar from './Sidebar'
 import { useAuth } from '../../context/AuthContext'
 import conversationService from '../../services/conversation.service'
 import GradientMesh from '../GradientMesh'
+import SoundByteIcon from '../SoundByteIcon'
 
 const ChatLayout = () => {
     const { user, logout } = useAuth()
@@ -44,10 +45,10 @@ const ChatLayout = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
-                        <h1 className="text-2xl font-black text-gradient flex items-center gap-2">
-                            <span className="text-3xl animate-pulse">💬</span>
+                        <h1 className="text-2xl font-black text-gradient flex items-center">
                             Playground
                         </h1>
+                        <SoundByteIcon size={75} animated={true} />
                     </div>
 
                     <div className="flex items-center space-x-4">
