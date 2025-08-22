@@ -2,9 +2,38 @@ import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import SoundByteIcon from '../components/SoundByteIcon'
 import GradientMesh from '../components/GradientMesh'
+import { useSubscription } from '../hooks/useSubscription'
+import { createCheckoutSession, createPortalSession } from '../services/stripe'
 
 const Profile = () => {
   const { user } = useAuth()
+  const { 
+    isLoading, 
+    hasSubscription, 
+    remainingTokens, 
+    tokenLimit, 
+    percentageUsed 
+  } = useSubscription()
+  
+  const handleUpgrade = async () => {
+    try {
+      const checkoutUrl = await createCheckoutSession()
+      window.location.href = checkoutUrl
+    } catch (error) {
+      console.error('Failed to create checkout session:', error)
+      alert('Failed to start checkout. Please try again.')
+    }
+  }
+  
+  const handleManageSubscription = async () => {
+    try {
+      const portalUrl = await createPortalSession()
+      window.location.href = portalUrl
+    } catch (error) {
+      console.error('Failed to create portal session:', error)
+      alert('Failed to open subscription management. Please try again.')
+    }
+  }
 
   return (
     <div className="min-h-screen relative">
@@ -70,9 +99,74 @@ const Profile = () => {
               </div>
             </div>
 
+            {/* Subscription Section */}
+            <div className="mt-6 pt-6 border-t border-white/20">
+              <h3 className="text-lg font-semibold mb-4">Subscription</h3>
+              
+              {isLoading ? (
+                <p className="text-gray-600">Loading subscription data...</p>
+              ) : (
+                <div className="space-y-4">
+                  {/* Subscription Status */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Status:</span>
+                    <span className={`font-semibold ${hasSubscription ? 'text-green-600' : 'text-gray-600'}`}>
+                      {hasSubscription ? 'Pro (Active)' : 'Free'}
+                    </span>
+                  </div>
+                  
+                  {/* Token Usage */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-700">Token Usage:</span>
+                      <span className="text-sm text-gray-600">
+                        {tokenLimit - remainingTokens} / {tokenLimit} tokens
+                      </span>
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all ${
+                          percentageUsed > 80 ? 'bg-red-500' : 
+                          percentageUsed > 50 ? 'bg-yellow-500' : 'bg-green-500'
+                        }`}
+                        style={{ width: `${Math.min(percentageUsed, 100)}%` }}
+                      />
+                    </div>
+                    
+                    {percentageUsed > 80 && (
+                      <p className="text-sm text-red-600 mt-1">
+                        Warning: You've used {percentageUsed}% of your monthly tokens
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* Action Button */}
+                  <div className="pt-4">
+                    {hasSubscription ? (
+                      <button 
+                        onClick={handleManageSubscription}
+                        className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:shadow-glow hover:scale-[1.02] transform cursor-pointer transition"
+                      >
+                        Manage Subscription
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={handleUpgrade}
+                        className="bg-pink-600 text-white px-4 py-2 rounded-xl hover:shadow-glow hover:scale-[1.02] transform cursor-pointer transition"
+                      >
+                        Upgrade to Pro ($19.99/month)
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            
             {/* Actions */}
             <div className="mt-6 pt-6 border-t border-white/20">
-              <button className="bg-pink-600 text-white px-4 py-2 rounded-xl hover:shadow-glow hover:scale-[1.02] transform cursor-pointer transition">
+              <button className="bg-gray-500 text-white px-4 py-2 rounded-xl hover:shadow-glow hover:scale-[1.02] transform cursor-pointer transition">
                 Edit Profile
               </button>
             </div>

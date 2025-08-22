@@ -99,7 +99,17 @@ export async function createPortalSession(userId: string, returnUrl: string) {
  */
 export async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   const userId = subscription.metadata.userId;
-  if (!userId) return;
+  if (!userId) {
+    console.log('No userId in subscription metadata:', subscription.id);
+    return;
+  }
+
+  // Ensure we have a valid timestamp
+  const periodEnd = (subscription as any).current_period_end;
+  if (!periodEnd) {
+    console.error('No current_period_end in subscription:', subscription.id);
+    return;
+  }
 
   // Update subscription in database
   await prisma.subscription.upsert({
@@ -109,13 +119,13 @@ export async function handleSubscriptionUpdate(subscription: Stripe.Subscription
       stripeSubscriptionId: subscription.id,
       stripePriceId: subscription.items.data[0].price.id,
       status: subscription.status,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodEnd: new Date(periodEnd * 1000),
+      cancelAtPeriodEnd: (subscription as any).cancel_at_period_end || false,
     },
     update: {
       status: subscription.status,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodEnd: new Date(periodEnd * 1000),
+      cancelAtPeriodEnd: (subscription as any).cancel_at_period_end || false,
     }
   });
 

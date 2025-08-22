@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 // Create checkout session
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   try {
-    const { userId, email } = req.user;
+    const { id: userId, email } = req.user;
 
     // Check if already subscribed
     const hasSubscription = await stripeService.hasActiveSubscription(userId);
@@ -35,7 +35,7 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 // Create customer portal session
 router.post('/create-portal-session', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.user;
+    const { id: userId } = req.user;
 
     const session = await stripeService.createPortalSession(
       userId,
@@ -52,7 +52,7 @@ router.post('/create-portal-session', authenticateToken, async (req, res) => {
 // Get subscription status
 router.get('/subscription-status', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.user;
+    const { id: userId } = req.user;
 
     const hasSubscription = await stripeService.hasActiveSubscription(userId);
     const remainingTokens = await stripeService.getRemainingTokens(userId);
@@ -71,7 +71,7 @@ router.get('/subscription-status', authenticateToken, async (req, res) => {
 // Get usage statistics
 router.get('/usage', authenticateToken, async (req, res) => {
   try {
-    const { userId } = req.user;
+    const { id: userId } = req.user;
     const period = new Date().toISOString().slice(0, 7);
 
     const usage = await prisma.usage.findUnique({
