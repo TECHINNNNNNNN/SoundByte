@@ -14,7 +14,7 @@ const MessageComponent = ({ message }: MessageProps) => {
             <div className={`flex max-w-3xl ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
                 {/* Avatar */}
                 <div className={`flex-shrink-0 ${isUser ? 'ml-3' : 'mr-3'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isUser ? 'bg-blue-600' : 'bg-gray-600'
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isUser ? 'bg-purple-600' : 'bg-pink-600'
                         }`}>
                         {isUser ? (
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,9 +30,9 @@ const MessageComponent = ({ message }: MessageProps) => {
 
                 {/* Message Content */}
                 <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-                    <div className={`px-4 py-2 rounded-lg ${isUser
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-800'
+                    <div className={`px-4 py-2 rounded-2xl ${isUser
+                        ? 'bg-purple-100 text-gray-700'
+                        : 'bg-pink-100 text-gray-700'
                         }`}>
                         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     </div>
