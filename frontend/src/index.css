@@ -126,7 +126,7 @@ select:focus {
 
 .card-hover:hover {
   @apply -translate-y-1;
-  /* Can't @apply a custom utility in Tailwind v4; set box-shadow directly */
+  
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.08),
     0 4px 6px -2px rgba(0, 0, 0, 0.05),
