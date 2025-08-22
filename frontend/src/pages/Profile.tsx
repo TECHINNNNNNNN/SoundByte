@@ -72,12 +72,7 @@ const Profile = () => {
       {/* Profile Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          {/* Glassmorphism card container
-             PURPOSE: Creates a translucent, blurred card with soft borders and subtle shadows
-             UX: Adds macOS-style traffic light dots at the top-right for familiar OS chrome
-             NOTE: Uses only Tailwind utilities and our custom shadow helpers for compatibility */}
           <div className="relative rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 ring-1 ring-white/10 shadow-soft p-8 card-hover">
-            {/* macOS-style traffic lights (top-right as requested) */}
             <div className="absolute top-4 right-4 flex items-center gap-2 select-none">
               <span className="w-3 h-3 rounded-full bg-[#ff5f56] ring-1 ring-white/40" aria-hidden="true"></span>
               <span className="w-3 h-3 rounded-full bg-[#ffbd2e] ring-1 ring-white/40" aria-hidden="true"></span>
@@ -85,7 +80,6 @@ const Profile = () => {
             </div>
             <h2 className="text-2xl font-semibold mb-6">Your Profile</h2>
 
-            {/* Avatar */}
             <div className="flex items-center mb-6">
               <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
                 {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase()}
