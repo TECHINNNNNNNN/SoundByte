@@ -68,13 +68,13 @@ export default function LandingPage() {
       {/* Navigation - Transparent at top, capsule glass when scrolled */}
       <nav className="fixed top-0 w-full z-50">
         <div className={`transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${scrolled ? 'py-3' : 'py-1'}`}>
-          <div className={`${scrolled ? 'max-w-3xl' : 'max-w-7xl'} mx-auto px-6 lg:px-8`}>
+          <div className={`${scrolled ? 'max-w-3xl' : 'max-w-7xl'} mx-auto mt-5`}>
             <div className={`flex justify-between items-center h-16 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${scrolled
               ? 'rounded-full bg-white/50 backdrop-blur-xl border border-white/20 shadow-sm px-4'
               : 'border border-transparent'
               }`}>
               <div className="flex items-center gap-3">
-                <SoundByteIcon size={32} animated={false} />
+                <SoundByteIcon size={150} animated={true} />
                 <span className="text-lg font-semibold text-gray-900">SoundByte</span>
               </div>
 
