@@ -158,3 +158,24 @@ select:focus {
   transform: translateZ(0);
   backface-visibility: hidden;
 }
+
+/* Global interactive cursor behavior (Tailwind v4 base layer) */
+@layer base {
+  a[href],
+  area[href],
+  button:not(:disabled),
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  label,
+  select,
+  summary {
+    @apply cursor-pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: default;
+  }
+}
