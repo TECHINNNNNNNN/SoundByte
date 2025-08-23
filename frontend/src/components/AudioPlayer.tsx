@@ -22,7 +22,7 @@ export default function AudioPlayer({
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const progressRef = useRef<HTMLDivElement>(null)
-  
+
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -85,7 +85,7 @@ export default function AudioPlayer({
     const rect = progressBar.getBoundingClientRect()
     const percent = (e.clientX - rect.left) / rect.width
     const newTime = percent * duration
-    
+
     audio.currentTime = newTime
     setCurrentTime(newTime)
   }
@@ -122,7 +122,7 @@ export default function AudioPlayer({
     const currentIndex = rates.indexOf(playbackRate)
     const nextIndex = (currentIndex + 1) % rates.length
     const newRate = rates[nextIndex]
-    
+
     audio.playbackRate = newRate
     setPlaybackRate(newRate)
   }
@@ -138,7 +138,7 @@ export default function AudioPlayer({
 
   const formatTime = (time: number) => {
     if (isNaN(time)) return '0:00'
-    
+
     const minutes = Math.floor(time / 60)
     const seconds = Math.floor(time % 60)
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
@@ -157,33 +157,33 @@ export default function AudioPlayer({
   // Compact variant for inline use
   if (variant === 'compact') {
     return (
-      <div className={`bg-white rounded-xl border border-gray-100 p-3 ${className}`}>
+      <div className={`bg-white rounded-xl border border-gray-100 p-4 ${className}`}>
         <div className="flex items-center gap-3">
           <button
             onClick={togglePlayPause}
-            className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center justify-center hover:shadow-glow transition-all duration-200"
+            className="size-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center justify-center hover:shadow-glow transition-all duration-200"
           >
             {isPlaying ? (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
               </svg>
             ) : (
-              <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="size-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             )}
           </button>
-          
+
           <div className="flex-1">
             {title && <p className="text-sm font-semibold text-gray-800 truncate">{title}</p>}
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">{formatTime(currentTime)}</span>
-              <div 
+              <div
                 ref={progressRef}
                 onClick={handleProgressClick}
                 className="flex-1 h-1 bg-gray-200 rounded-full cursor-pointer relative"
               >
-                <div 
+                <div
                   className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full"
                   style={{ width: `${progressPercent}%` }}
                 />
@@ -200,12 +200,12 @@ export default function AudioPlayer({
   // Mini variant for smaller spaces
   if (variant === 'mini') {
     return (
-      <div className={`bg-white rounded-2xl border border-gray-100 shadow-lg p-4 ${className}`}>
-        <div className="flex items-center gap-4">
+      <div className={`bg-white rounded-2xl border border-gray-100 shadow-lg pl-6 pr-10 py-4 ${className}`}>
+        <div className="flex items-center justify-between gap-6">
           <button
             onClick={togglePlayPause}
             disabled={isLoading}
-            className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center justify-center hover:shadow-glow transition-all duration-200 disabled:opacity-50"
+            className="size-14 cursor-pointer rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white flex items-center justify-center hover:shadow-glow transition-all duration-200 disabled:opacity-50"
           >
             {isLoading ? (
               <SoundByteIcon size={24} animated={true} />
@@ -219,18 +219,18 @@ export default function AudioPlayer({
               </svg>
             )}
           </button>
-          
+
           <div className="flex-1">
             {title && <p className="font-semibold text-gray-800">{title}</p>}
             {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
-            
+
             <div className="mt-2">
-              <div 
+              <div
                 ref={progressRef}
                 onClick={handleProgressClick}
                 className="h-2 bg-gray-200 rounded-full cursor-pointer relative overflow-hidden"
               >
-                <div 
+                <div
                   className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full transition-all duration-300"
                   style={{ width: `${progressPercent}%` }}
                 />
@@ -266,19 +266,19 @@ export default function AudioPlayer({
       {/* Main Controls */}
       <div className="mb-6">
         {/* Progress Bar */}
-        <div 
+        <div
           ref={progressRef}
           onClick={handleProgressClick}
           className="h-3 bg-gray-200 rounded-full cursor-pointer relative overflow-hidden group"
         >
-          <div 
+          <div
             className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full transition-all duration-300 group-hover:shadow-glow"
             style={{ width: `${progressPercent}%` }}
           >
             <div className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
         </div>
-        
+
         {/* Time Display */}
         <div className="flex justify-between mt-2">
           <span className="text-sm text-gray-600">{formatTime(currentTime)}</span>
@@ -295,7 +295,7 @@ export default function AudioPlayer({
           title="Skip backward 15s"
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+            <path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
             <text x="12" y="16" fontSize="10" textAnchor="middle" fill="currentColor">15</text>
           </svg>
         </button>
@@ -326,7 +326,7 @@ export default function AudioPlayer({
           title="Skip forward 15s"
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" transform="scale(-1, 1)">
-            <path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+            <path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
             <text x="12" y="16" fontSize="10" textAnchor="middle" fill="currentColor" transform="scale(-1, 1)" style={{ transformOrigin: '12px 16px' }}>15</text>
           </svg>
         </button>
@@ -339,11 +339,11 @@ export default function AudioPlayer({
           <button onClick={toggleMute} className="text-gray-600 hover:text-purple-600 transition-colors">
             {isMuted || volume === 0 ? (
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
               </svg>
             ) : (
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
               </svg>
             )}
           </button>

@@ -4,12 +4,29 @@ import digestService, { type Digest, type CreateDigestDto } from '../services/di
 import GradientMesh from '../components/GradientMesh'
 import SoundByteIcon from '../components/SoundByteIcon'
 import AudioPlayer from '../components/AudioPlayer'
+import { z } from 'zod'
+
+const createDigestSchema = z.object({
+  title: z.string().trim().min(1, { message: 'Title is required' }).max(255, { message: 'Title must be less than 255 characters' }),
+  searchQuery: z.string().trim().min(1, { message: 'Search query is required' }).max(255, { message: 'Search query must be less than 255 characters' }),
+  frequency: z.enum(['daily', 'weekly', 'monthly']),
+  audioLength: z
+    .number()
+    .int({ message: 'Audio length must be a whole number' })
+    .refine((v) => [2, 5, 10].includes(v), {
+      message: 'Audio length must be one of 2, 5, or 10 minutes'
+    }),
+  timezone: z.string().min(1, { message: 'Timezone is required' }),
+  preferredHour: z.number().min(0, { message: 'Preferred hour is required' }).max(23, { message: 'Preferred hour must be less than 24' }),
+  useDefaultEmail: z.boolean().default(true)
+})
 
 export default function DigestDashboard() {
   const [digests, setDigests] = useState<Digest[]>([])
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(true)
   const [generatingId, setGeneratingId] = useState<string | null>(null)
+  const [formError, setFormError] = useState<{ [key: string]: string }>({})
   const navigate = useNavigate()
 
   // Form state
@@ -41,6 +58,8 @@ export default function DigestDashboard() {
   const createDigest = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      createDigestSchema.parse(formData)
+      setFormError({})
       await digestService.createDigest(formData)
       setShowForm(false)
       setFormData({
@@ -54,7 +73,16 @@ export default function DigestDashboard() {
       })
       fetchDigests()
     } catch (error) {
-      console.error('Failed to create digest:', error)
+      if (error instanceof z.ZodError) {
+        const errors: { [key: string]: string } = {}
+        error.issues.forEach((issue) => {
+          const field = String(issue.path[0] ?? 'form')
+          errors[field] = issue.message
+        })
+        setFormError(errors)
+      } else {
+        console.error('Failed to create digest:', error)
+      }
     }
   }
 
@@ -149,6 +177,9 @@ export default function DigestDashboard() {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
+                {formError.title && (
+                  <p className="mt-1 text-sm text-red-600">{formError.title}</p>
+                )}
               </div>
 
               <div>
@@ -161,6 +192,9 @@ export default function DigestDashboard() {
                   value={formData.searchQuery}
                   onChange={(e) => setFormData({ ...formData, searchQuery: e.target.value })}
                 />
+                {formError.searchQuery && (
+                  <p className="mt-1 text-sm text-red-600">{formError.searchQuery}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -175,6 +209,9 @@ export default function DigestDashboard() {
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                   </select>
+                  {formError.frequency && (
+                    <p className="mt-1 text-sm text-red-600">{formError.frequency}</p>
+                  )}
                 </div>
 
                 <div>
@@ -188,6 +225,9 @@ export default function DigestDashboard() {
                     <option value="5">5 minutes</option>
                     <option value="10">10 minutes</option>
                   </select>
+                  {formError.audioLength && (
+                    <p className="mt-1 text-sm text-red-600">{formError.audioLength}</p>
+                  )}
                 </div>
               </div>
 
@@ -205,6 +245,9 @@ export default function DigestDashboard() {
                       </option>
                     ))}
                   </select>
+                  {formError.preferredHour && (
+                    <p className="mt-1 text-sm text-red-600">{formError.preferredHour}</p>
+                  )}
                 </div>
 
                 <div>
@@ -215,6 +258,9 @@ export default function DigestDashboard() {
                     value={formData.timezone}
                     readOnly
                   />
+                  {formError.timezone && (
+                    <p className="mt-1 text-sm text-red-600">{formError.timezone}</p>
+                  )}
                 </div>
               </div>
 
