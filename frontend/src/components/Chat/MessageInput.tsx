@@ -67,7 +67,7 @@ const MessageInput = ({ onSendMessage, disabled = false, placeholder = "Type you
                 </div>
                 <button
                     onClick={handleSend}
-                    disabled={disabled || !!error.message}
+                    disabled={disabled || !!error.message || !message.trim()}
                     className="px-4 py-2 bg-pink-600 text-white rounded-xl cursor-pointer hover:bg-pink-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition absolute right-6"
                 >
                     <Banana className="size-5" />
