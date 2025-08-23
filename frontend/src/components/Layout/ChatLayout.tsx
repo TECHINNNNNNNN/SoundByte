@@ -34,7 +34,7 @@ const ChatLayout = () => {
             <GradientMesh />
 
             {/* Top Navigation Bar */}
-            <nav className="bg-white/95 backdrop-blur-md border-b border-gray-100 h-16 flex items-center px-4 shadow-sm relative z-50">
+            <nav className="bg-white/95 backdrop-blur-md h-16 flex items-center px-4 shadow-sm relative z-50">
                 <div className="flex items-center justify-between w-full max-w-full">
                     <div className="flex items-center space-x-4">
                         <button

@@ -1,33 +1,73 @@
 @import "tailwindcss";
 
-/* Custom animations */
-@keyframes blob {
+/* Smooth gradient mesh animations - optimized for performance */
+@keyframes float-slow {
   0%, 100% {
-    transform: translate(0px, 0px) scale(1) rotate(0deg);
+    transform: translate(0, 0) scale(1);
   }
-  25% {
-    transform: translate(20px, -30px) scale(1.05) rotate(1deg);
+  33% {
+    transform: translate(30px, -20px) scale(1.1);
   }
-  50% {
-    transform: translate(-15px, 20px) scale(0.98) rotate(-1deg);
-  }
-  75% {
-    transform: translate(15px, -15px) scale(1.02) rotate(0.5deg);
+  66% {
+    transform: translate(-20px, 30px) scale(0.95);
   }
 }
 
-.animate-blob {
-  animation: blob 20s ease-in-out infinite;
-  transform-origin: center;
+@keyframes float-slow-reverse {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-30px, 20px) scale(0.95);
+  }
+  66% {
+    transform: translate(20px, -30px) scale(1.1);
+  }
+}
+
+@keyframes float-medium {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(25px, 25px) scale(1.05);
+  }
+}
+
+@keyframes float-fast {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(-15px, 15px) scale(1.02);
+  }
+  50% {
+    transform: translate(15px, -15px) scale(0.98);
+  }
+  75% {
+    transform: translate(-10px, -10px) scale(1.02);
+  }
+}
+
+/* Animation classes */
+.animate-float-slow {
+  animation: float-slow 30s ease-in-out infinite;
   will-change: transform;
 }
 
-.animation-delay-2000 {
-  animation-delay: 2s;
+.animate-float-slow-reverse {
+  animation: float-slow-reverse 35s ease-in-out infinite;
+  will-change: transform;
 }
 
-.animation-delay-4000 {
-  animation-delay: 4s;
+.animate-float-medium {
+  animation: float-medium 25s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-fast {
+  animation: float-fast 20s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Smooth scrolling */
@@ -57,41 +97,29 @@ html {
 
 /* Glass morphism effect */
 .glass {
-  @apply bg-white backdrop-blur-sm;
+  @apply bg-white/60 backdrop-blur-xl;
 }
 
 /* Subtle shadow utilities */
 @layer utilities {
   .shadow-soft {
     box-shadow: 
-      0 4px 6px -1px rgba(0, 0, 0, 0.05),
-      0 2px 4px -1px rgba(0, 0, 0, 0.03),
-      0 10px 40px -10px rgba(147, 51, 234, 0.08);
+      0 4px 6px -1px rgba(0, 0, 0, 0.03),
+      0 2px 4px -1px rgba(0, 0, 0, 0.02),
+      0 10px 40px -10px rgba(147, 51, 234, 0.05);
   }
 
   .shadow-glow {
     box-shadow: 
-      0 10px 15px -3px rgba(0, 0, 0, 0.08),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05),
-      0 20px 60px -15px rgba(147, 51, 234, 0.25);
-  }
-  .hover\:shadow-glow:hover {
-    box-shadow: 
-      0 10px 15px -3px rgba(0, 0, 0, 0.08),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05),
-      0 20px 60px -15px rgba(147, 51, 234, 0.25);
-  }
-  .group:hover .group-hover\:shadow-glow {
-    box-shadow: 
-      0 10px 15px -3px rgba(0, 0, 0, 0.08),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05),
-      0 20px 60px -15px rgba(147, 51, 234, 0.25);
+      0 10px 15px -3px rgba(0, 0, 0, 0.05),
+      0 4px 6px -2px rgba(0, 0, 0, 0.03),
+      0 20px 60px -15px rgba(147, 51, 234, 0.15);
   }
 }
 
 /* Text gradient */
 .text-gradient {
-  @apply bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-purple-600/80 to-pink-600/80 bg-clip-text text-transparent;
 }
 
 /* Improved focus states */
@@ -105,30 +133,49 @@ select:focus {
   @apply ring-2 ring-purple-500/20 border-purple-400;
 }
 
-/* Button hover effects */
-.btn-primary {
-  @apply relative overflow-hidden;
+/* Subtle fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.btn-primary::before {
-  content: '';
-  @apply absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 transition-opacity duration-300;
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
 }
 
-.btn-primary:hover::before {
-  @apply opacity-100;
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
 }
 
-/* Card hover lift effect */
-.card-hover {
-  @apply transition-all duration-300 ease-out;
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-.card-hover:hover {
-  @apply -translate-y-1;
-  
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.08),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05),
-    0 20px 60px -15px rgba(147, 51, 234, 0.25);
+/* Global interactive cursor behavior (Tailwind v4 base layer) */
+@layer base {
+  a[href],
+  area[href],
+  button:not(:disabled),
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  label,
+  select,
+  summary {
+    @apply cursor-pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: default;
+  }
 }
