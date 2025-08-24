@@ -126,9 +126,9 @@ export default function LandingPage() {
             {/* Left: Headline + CTA */}
             <div className="space-y-8">
               <div>
-                <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-gray-900 leading-[1.05]">
+                <h1 className="font-display text-5xl sm:text-6xl leading-tight overflow-visible lg:text-7xl font-bold tracking-tight text-gray-900 leading-[1.05]">
                   <span className="block">News that</span>
-                  <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">speaks to you</span>
+                  <span className="block pb-8 overflow-visible sm:pb-1.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">speaks to you</span>
                 </h1>
                 <p className="mt-6 text-xl text-gray-600 max-w-xl">
                   Turn long reads into bite-sized, podcast-quality audio. Choose interests, set a schedule, hit play.
