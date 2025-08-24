@@ -187,8 +187,11 @@ router.post('/:id/generate', authenticateToken, async (req, res) => {
   }
 });
 
-// Test email sending (for testing)
+// Test email sending (development only)
 router.post('/test-email', authenticateToken, async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
+  }
   try {
     const { sendDigestEmail } = await import('../services/email.service.js');
 
@@ -218,8 +221,11 @@ GUEST: Indeed! Your audio digest system is ready to go.`
   }
 });
 
-// Trigger scheduler manually (for testing)
+// Trigger scheduler manually (development only)
 router.post('/trigger-scheduler', authenticateToken, async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
+  }
   try {
     const { triggerDigests } = await import('../services/scheduler.service.js');
     const results = await triggerDigests();

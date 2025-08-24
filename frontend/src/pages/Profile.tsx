@@ -17,7 +17,6 @@ const Profile = () => {
     percentageUsed,
     refetch
   } = useSubscription()
-  console.log(hasSubscription)
 
   // Refresh subscription data when returning from payment
   useEffect(() => {
