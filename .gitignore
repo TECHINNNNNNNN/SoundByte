@@ -1,5 +1,12 @@
 # Root .gitignore for SoundByte monorepo
 
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+*.env
+
 # IDE and Editor files
 .vscode/
 .idea/
