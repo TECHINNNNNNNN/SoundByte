@@ -334,7 +334,7 @@ export default function LandingPage() {
                 1
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2 group-hover:tracking-wide transition-all"><span className="font-mono text-gray-400 mr-2">$</span>Choose your interests</h3>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2 group-hover:tracking-wide transition-all">Choose your interests</h3>
                 <p className="text-lg text-gray-600">
                   Select from technology, business, science, culture, and more. Customize sources and topics to match your preferences perfectly.
                 </p>
@@ -347,7 +347,7 @@ export default function LandingPage() {
                 2
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2 group-hover:tracking-wide transition-all"><span className="font-mono text-gray-400 mr-2">$</span>Set your schedule</h3>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2 group-hover:tracking-wide transition-all">Set your schedule</h3>
                 <p className="text-lg text-gray-600">
                   Pick when you want to receive your audio digest. Morning commute? Lunch break? Evening wind-down? It's your choice.
                 </p>
@@ -360,7 +360,7 @@ export default function LandingPage() {
                 3
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2 group-hover:tracking-wide transition-all"><span className="font-mono text-gray-400 mr-2">$</span>Listen and enjoy</h3>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2 group-hover:tracking-wide transition-all">Listen and enjoy</h3>
                 <p className="text-lg text-gray-600">
                   Receive professionally produced audio content. Stream instantly or download for offline listening wherever you go.
                 </p>
