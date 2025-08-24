@@ -19,21 +19,19 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3000
 
-// Rate Limiter - relaxed for development
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: process.env.NODE_ENV === 'production' ? 100 : 1000, // 1000 for dev, 100 for prod
     message: "Too many requests, please try again later.",
-    standardHeaders: true, // Return rate limit info in headers
+    standardHeaders: true,
     legacyHeaders: false,
 })
 
 app.use(limiter)
 
-// Webhook routes MUST come before body parsing middleware
+// webhooks need raw body
 app.use("/api/webhooks", webhookRoutes)
 
-// Middleware
 app.use(cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
@@ -45,7 +43,6 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 
-// session configuration
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -56,7 +53,6 @@ app.use(session({
     }
 }))
 
-// passport initialization
 app.use(passport.initialize())
 
 app.use("/api/auth", authRoutes)
@@ -67,7 +63,6 @@ app.use("/api/digests", digestRoutes)
 app.use("/api/payments", paymentRoutes)
 
 
-// Health check endpoint
 app.get("/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() })
 })
@@ -77,12 +72,10 @@ app.use((err, _req, res, _next) => {
     res.status(500).json({ message: "SoundByte API is currently experiencing issues. Please try again later." })
 })
 
-// Catch-all 404 handler
 app.use((_req, res) => {
     res.status(404).json({ message: "Route not found" })
 })
 
-// Start scheduler
 import { startScheduler } from './services/scheduler.service.js'
 
 app.listen(PORT, () => {

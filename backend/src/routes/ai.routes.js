@@ -1,5 +1,3 @@
-// Simple route to test our AI service
-
 import express from 'express'
 import { authenticateToken } from '../middleware/auth.js'
 import * as aiService from '../services/ai.service.js'
@@ -7,10 +5,6 @@ import * as tokenUsage from '../services/tokenUsage.ts'
 
 const router = express.Router()
 
-/**
- * POST /api/ai/message
- * Send a message and get AI response
- */
 router.post('/message', authenticateToken, async (req, res) => {
   try {
     const { conversationId, message } = req.body
@@ -20,7 +14,6 @@ router.post('/message', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Missing conversationId or message' })
     }
 
-    // Check token availability before processing
     const tokenCheck = await tokenUsage.checkTokensAvailable(userId, message.length)
     if (!tokenCheck.allowed) {
       return res.status(403).json({
@@ -35,7 +28,6 @@ router.post('/message', authenticateToken, async (req, res) => {
       userId
     )
 
-    // Track token usage after successful response
     await tokenUsage.trackTokenUsage(
       userId,
       message,
@@ -43,7 +35,6 @@ router.post('/message', authenticateToken, async (req, res) => {
       'chat'
     )
 
-    // Return the response as JSON
     return res.json({
       content: result.text,
       messageId: result.messageId,
@@ -58,10 +49,6 @@ router.post('/message', authenticateToken, async (req, res) => {
   }
 })
 
-/**
- * GET /api/ai/usage
- * Get current token usage stats
- */
 router.get('/usage', authenticateToken, async (req, res) => {
   try {
     const stats = await tokenUsage.getUsageStats(req.user.id)
