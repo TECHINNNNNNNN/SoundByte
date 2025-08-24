@@ -151,7 +151,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right: Fancy Terminal with typing + audio at completion */}
+            {/* Right: Fancy Terminal with typing. Audio player appears outside below to avoid layout shift */}
             <div className="relative group">
               <div className="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-blue-500/20 via-purple-500/15 to-pink-500/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" aria-hidden="true" />
               <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-gray-900 to-gray-900/90 backdrop-blur-xl shadow-2xl overflow-hidden">
@@ -171,36 +171,48 @@ export default function LandingPage() {
                     <span className="animate-pulse">_</span>
                   </div>
                 </div>
+              </div>
 
-                {showAudioPlayer && (
-                  <div className="px-4 pb-4 border-t border-white/10 bg-gray-950/30">
-                    <AudioPlayer
-                      src="https://soundbyte-audio-news.s3.ap-southeast-2.amazonaws.com/audio/digest-cmek34uxk0003ufdig7n9nbuo-1755855975212.wav"
-                      title="Tech News Daily"
-                      subtitle="Your personalized audio digest"
-                      variant="compact"
-                      className="shadow-lg"
-                    />
-                    <div className="mt-3 flex justify-end">
-                      <button
-                        onClick={() => navigate(user ? '/dashboard' : '/register')}
-                        className="text-xs px-3 py-2 rounded-full border border-white/15 text-gray-200 hover:bg-white/10 transition-colors"
-                      >
-                        {user ? 'Generate New Digest' : 'Make My First Digest'}
-                      </button>
-                    </div>
+              {/* Reserved space below terminal for audio player */}
+              <div className="mt-4">
+                <div className="relative rounded-2xl border border-white/10 bg-gray-950/30 backdrop-blur-xl overflow-hidden shadow-xl transition-all">
+                  <div className="min-h-[120px]">
+                    {!showAudioPlayer ? (
+                      <div className="p-4 animate-pulse">
+                        <div className="h-4 w-40 bg-white/15 rounded mb-2" />
+                        <div className="h-3 w-64 bg-white/10 rounded" />
+                      </div>
+                    ) : (
+                      <div className="p-3">
+                        <AudioPlayer
+                          src="https://soundbyte-audio-news.s3.ap-southeast-2.amazonaws.com/audio/digest-cmek34uxk0003ufdig7n9nbuo-1755855975212.wav"
+                          title="Tech News Daily"
+                          subtitle="Your personalized audio digest"
+                          variant="compact"
+                          className="shadow-none"
+                        />
+                        <div className="mt-3 flex justify-end">
+                          <button
+                            onClick={() => navigate(user ? '/dashboard' : '/register')}
+                            className="text-xs px-3 py-2 rounded-full border border-white/15 text-gray-200 hover:bg-white/10 transition-colors"
+                          >
+                            {user ? 'Generate New Digest' : 'Make My First Digest'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section - Apple card style with Lucide icons */}
+      {/* Features Section - Premium, clean, subtle terminal motif wrapper */}
       <section id="features" className="py-20 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10">
             <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4 hover:tracking-wide transition-all duration-300">
               Designed for listeners
             </h2>
@@ -209,92 +221,104 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Feature 1 */}
-            <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/50 p-8 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-gray-300">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Target className="w-7 h-7 text-white" />
+          {/* Terminal-styled wrapper around features */}
+          <div className="relative rounded-3xl border border-gray-200/70 bg-white/70 backdrop-blur-xl shadow-xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200/70">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-red-400/90" />
+                <span className="w-3 h-3 rounded-full bg-yellow-400/90" />
+                <span className="w-3 h-3 rounded-full bg-green-400/90" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
-                Curated for You
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Select topics that matter to you. Our AI curates content from trusted sources, ensuring relevance and quality.
-              </p>
+              <span className="text-xs text-gray-500 font-mono">features.sh</span>
             </div>
 
-            {/* Feature 2 */}
-            <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/50 p-8 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-gray-300">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Mic className="w-7 h-7 text-white" />
+            <div className="p-6 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Feature 1 */}
+              <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Target className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
+                  Curated for You
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Select topics that matter to you. Our AI curates content from trusted sources, ensuring relevance and quality.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
-                Natural Voices
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Experience podcast-quality audio with AI hosts that sound natural, engaging, and easy to listen to.
-              </p>
-            </div>
 
-            {/* Feature 3 */}
-            <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/50 p-8 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-gray-300">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Zap className="w-7 h-7 text-white" />
+              {/* Feature 2 */}
+              <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Mic className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
+                  Natural Voices
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Experience podcast-quality audio with AI hosts that sound natural, engaging, and easy to listen to.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
-                Smart Scheduling
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Daily, weekly, or monthly. Set your schedule and never miss what's important to you.
-              </p>
-            </div>
 
-            {/* Feature 4 */}
-            <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/50 p-8 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-gray-300">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Smartphone className="w-7 h-7 text-white" />
+              {/* Feature 3 */}
+              <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Zap className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
+                  Smart Scheduling
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Daily, weekly, or monthly. Set your schedule and never miss what's important to you.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
-                Listen Anywhere
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Stream from any device. Download for offline listening. Your audio library, always accessible.
-              </p>
-            </div>
 
-            {/* Feature 5 */}
-            <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/50 p-8 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-gray-300">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Lock className="w-7 h-7 text-white" />
+              {/* Feature 4 */}
+              <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Smartphone className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
+                  Listen Anywhere
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Stream from any device. Download for offline listening. Your audio library, always accessible.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
-                Privacy First
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Your preferences stay private. No tracking, no data selling. Just personalized audio for you.
-              </p>
-            </div>
 
-            {/* Feature 6 */}
-            <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/50 p-8 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-gray-300">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Sparkles className="w-7 h-7 text-white" />
+              {/* Feature 5 */}
+              <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Lock className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
+                  Privacy First
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Your preferences stay private. No tracking, no data selling. Just personalized audio for you.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
-                AI-Powered
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                Advanced AI creates engaging narratives from complex topics, making everything easy to understand.
-              </p>
+
+              {/* Feature 6 */}
+              <div className="group bg-white/90 backdrop-blur-xl rounded-2xl border border-gray-200/60 p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:tracking-wide transition-all">
+                  AI-Powered
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Advanced AI creates engaging narratives from complex topics, making everything easy to understand.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How it Works - Minimal Apple style */}
-      <section className="py-20 px-6 lg:px-8 bg-white/30 backdrop-blur-sm">
+      {/* How it Works - Clean steps with subtle terminal prompt motif */}
+      <section className="py-20 px-6 lg:px-8 bg-white/40 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4 hover:tracking-wide transition-all duration-300">
               Simple as 1-2-3
             </h2>
@@ -303,10 +327,10 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Step 1 */}
-            <div className="flex gap-6 items-start group">
-              <div className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold shrink-0 group-hover:scale-110 transition-transform">
+            <div className="flex gap-6 items-start group rounded-2xl border border-gray-200/70 bg-white/80 backdrop-blur-xl p-6 hover:shadow-xl transition-all hover:-translate-y-0.5">
+              <div className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold shrink-0 group-hover:scale-110 transition-transform shadow-sm">
                 1
               </div>
               <div className="flex-1">
@@ -318,8 +342,8 @@ export default function LandingPage() {
             </div>
 
             {/* Step 2 */}
-            <div className="flex gap-6 items-start group">
-              <div className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold shrink-0 group-hover:scale-110 transition-transform">
+            <div className="flex gap-6 items-start group rounded-2xl border border-gray-200/70 bg-white/80 backdrop-blur-xl p-6 hover:shadow-xl transition-all hover:-translate-y-0.5">
+              <div className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold shrink-0 group-hover:scale-110 transition-transform shadow-sm">
                 2
               </div>
               <div className="flex-1">
@@ -331,8 +355,8 @@ export default function LandingPage() {
             </div>
 
             {/* Step 3 */}
-            <div className="flex gap-6 items-start group">
-              <div className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold shrink-0 group-hover:scale-110 transition-transform">
+            <div className="flex gap-6 items-start group rounded-2xl border border-gray-200/70 bg-white/80 backdrop-blur-xl p-6 hover:shadow-xl transition-all hover:-translate-y-0.5">
+              <div className="w-12 h-12 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold shrink-0 group-hover:scale-110 transition-transform shadow-sm">
                 3
               </div>
               <div className="flex-1">
