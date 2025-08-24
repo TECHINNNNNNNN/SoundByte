@@ -51,11 +51,9 @@ const ChatInterface = () => {
         try {
             setSending(true)
 
-            // Add user message
             const userMessage = await conversationService.addMessage(conversationId, content, 'user')
             setMessages(prev => [...prev, userMessage])
 
-            // Show AI is working
             const isNewsQuery = content.toLowerCase().includes('news') ||
                 content.toLowerCase().includes('latest') ||
                 content.toLowerCase().includes('today')
@@ -63,10 +61,8 @@ const ChatInterface = () => {
                 ? '🔍 Researching news and generating audio... (this may take a minute)'
                 : '💭 Generating response...')
 
-            // Call AI service
             const aiResponse = await aiService.sendMessage(conversationId, content)
 
-            // Clear status and add assistant message
             setAiStatus('')
             const assistantMessage: Message = {
                 id: aiResponse.messageId,
@@ -79,7 +75,6 @@ const ChatInterface = () => {
             setMessages(prev => [...prev, assistantMessage])
         } catch (error: any) {
             console.error('Failed to send message:', error)
-            // Handle token limit errors
             if (error.response?.status === 403) {
                 setAiStatus(`⚠️ ${error.response.data.error}`)
             } else {

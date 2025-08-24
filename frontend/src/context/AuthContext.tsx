@@ -26,21 +26,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true)
     const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-    // Check authentication status
     const checkAuth = async () => {
         try {
-            // Try to get user info - cookies will be sent automatically
             const response = await api.get<UserResponse>("/auth/me")
             setUser(response.data.user)
             setIsAuthenticated(true)
         } catch (error) {
-            // User is not authenticated or tokens are invalid
             setUser(null)
             setIsAuthenticated(false)
         }
     }
 
-    // Initialize auth state on app load
     useEffect(() => {
         const initAuth = async () => {
             await checkAuth()
@@ -49,7 +45,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         initAuth()
     }, [])
 
-    // Handle login (email/password)
     const login = async (email: string, password: string) => {
         try {
             const response = await api.post<AuthResponse>("/auth/login", { email, password })
@@ -67,7 +62,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
-    // Handle registration
     const register = async (name: string, email: string, password: string) => {
         try {
             const response = await api.post<AuthResponse>('/auth/register', { name, email, password })
@@ -85,14 +79,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
-    // Handle logout
     const logout = async () => {
         try {
             await api.post("/auth/logout")
         } catch (error) {
             console.error("Error logging out:", error)
         } finally {
-            // Clear auth state
             setIsAuthenticated(false)
             setUser(null)
         }

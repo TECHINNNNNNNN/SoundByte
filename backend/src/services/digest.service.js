@@ -7,9 +7,7 @@ import { sendDigestEmail } from './email.service.js'
 
 const prisma = new PrismaClient()
 
-/**
- * Generate digest: Research → Format → Audio → Store
- */
+// basically: research -> format -> audio -> store
 export async function generateDigest(digestId) {
   const digest = await prisma.digest.findUnique({
     where: { id: digestId },
@@ -20,33 +18,27 @@ export async function generateDigest(digestId) {
     throw new Error('Digest not found or inactive')
   }
   
-  // Step 1: Research with Perplexity
   const prompt = `${digest.searchQuery}. Provide latest news and key developments from the past ${
     digest.frequency === 'daily' ? 'day' : digest.frequency === 'weekly' ? 'week' : 'month'
   }.`
   const research = await researchNews(prompt)
   
-  // Step 2: Format as dialogue with OpenAI
   const dialogue = await formatAsDialogue(
     research.content,
     digest.title,
     digest.audioLength
   )
   
-  // Step 3: Generate audio with Google TTS
   const audio = await generateMultiSpeakerAudio(dialogue, [
     { name: 'HOST', voice: 'Kore' },
     { name: 'GUEST', voice: 'Puck' }
   ])
   
-  // Step 4: Upload to S3
-  const filename = `digest-${digestId}-${Date.now()}` // No extension, S3 service adds it
-  // Convert base64 to Buffer for S3 upload (same as chat audio)
+  const filename = `digest-${digestId}-${Date.now()}`
   const audioBuffer = Buffer.from(audio.audioContent, 'base64')
   const uploadResult = await uploadAudio(audioBuffer, filename, 'wav')
   const audioUrl = uploadResult.url || uploadResult // Handle both object and string returns
   
-  // Step 5: Save delivery record
   const delivery = await prisma.digestDelivery.create({
     data: {
       digestId,
@@ -56,7 +48,6 @@ export async function generateDigest(digestId) {
     }
   })
   
-  // Step 6: Send email
   try {
     const recipientEmail = digest.useDefaultEmail ? digest.user.email : digest.deliveryEmail
     if (recipientEmail) {
@@ -66,7 +57,6 @@ export async function generateDigest(digestId) {
         transcript: dialogue
       }, audioUrl)
       
-      // Mark as delivered
       await prisma.digestDelivery.update({
         where: { id: delivery.id },
         data: { 
@@ -77,10 +67,9 @@ export async function generateDigest(digestId) {
     }
   } catch (emailError) {
     console.error('Email delivery failed:', emailError.message)
-    // Don't fail the whole process if email fails
+    // email failed but whatever
   }
   
-  // Update next generation time and last generated time
   await prisma.digest.update({
     where: { id: digestId },
     data: { 
@@ -92,9 +81,6 @@ export async function generateDigest(digestId) {
   return delivery
 }
 
-/**
- * Calculate next generation time
- */
 function getNextGenerationTime(frequency, timezone = 'UTC', preferredHour = 8) {
   const next = new Date()
   
@@ -116,9 +102,6 @@ function getNextGenerationTime(frequency, timezone = 'UTC', preferredHour = 8) {
   return next
 }
 
-/**
- * Process all pending digests
- */
 export async function processPendingDigests() {
   const pending = await prisma.digest.findMany({
     where: {
