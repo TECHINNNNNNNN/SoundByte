@@ -1,9 +1,3 @@
-// Location: frontend/src/components/Chat/MessageList.tsx
-// 
-// INSTRUCTIONS:
-// 1. Create this new file at frontend/src/components/Chat/MessageList.tsx
-// 2. This displays the list of messages in a conversation
-
 import { type Message } from '../../services/conversation.service'
 import MessageComponent from './Message'
 

@@ -1,5 +1,4 @@
-// AI Service - Clean, functional, no hardcoding
-// The AI decides everything based on tool descriptions and system prompt
+// ai stuff - uses tools when it wants
 
 import { generateText, tool, stepCountIs } from 'ai'
 import { openai } from '@ai-sdk/openai'
@@ -17,10 +16,7 @@ import {
 
 const prisma = new PrismaClient()
 
-/**
- * Define the news search tool using the tool() helper
- * AI SDK 5: uses 'inputSchema' instead of 'parameters'
- */
+// news search tool
 const searchNewsTool = tool({
   description: ENHANCED_TOOL_DESCRIPTION,
   inputSchema: z.object({
@@ -35,12 +31,10 @@ const searchNewsTool = tool({
   }
 })
 
-// Store current message ID for audio generation
+// hacky but works
 let currentMessageId = null
 
-/**
- * Audio generation tool - creates actual audio when user confirms
- */
+// audio gen tool - only fires when user confirms
 const generateAudioTool = tool({
   description: AUDIO_GENERATION_TOOL_DESCRIPTION,
   inputSchema: z.object({
@@ -81,11 +75,7 @@ const generateAudioTool = tool({
   }
 })
 
-/**
- * Process a message with AI - clean and simple
- */
 export const processMessage = async (conversationId, userMessage, userId) => {
-  // 1. Get conversation history (for context)
   const conversation = await prisma.conversation.findFirst({
     where: { id: conversationId, userId },
     include: {
@@ -100,7 +90,6 @@ export const processMessage = async (conversationId, userMessage, userId) => {
     throw new Error('Conversation not found')
   }
 
-  // 2. Save user message
   await prisma.message.create({
     data: {
       conversationId,
@@ -109,7 +98,6 @@ export const processMessage = async (conversationId, userMessage, userId) => {
     }
   })
 
-  // 3. Create placeholder for assistant response
   const assistantMsg = await prisma.message.create({
     data: {
       conversationId,
@@ -118,10 +106,9 @@ export const processMessage = async (conversationId, userMessage, userId) => {
     }
   })
 
-  // Set current message ID for audio generation tool
   currentMessageId = assistantMsg.id
 
-  // 4. Generate response with tools (not streaming for reliability)
+  // not streaming cuz tools
   const result = await generateText({
     model: openai('gpt-5'),
     system: ENHANCED_SYSTEM_PROMPT + CONVERSATION_STATE_PROMPT,
@@ -137,16 +124,14 @@ export const processMessage = async (conversationId, userMessage, userId) => {
       generateAudio: generateAudioTool
     },
     toolChoice: 'auto',
-    stopWhen: stepCountIs(5)  // AI SDK 5: Ensures text response after tool usage
+    stopWhen: stepCountIs(5)  // prevent infinite loops
   })
 
-  // Extract response details
   const { text, steps } = result
 
   console.log(`📊 Total steps: ${steps?.length || 0}`)
   console.log(`📝 Final text length: ${text?.length || 0}`)
 
-  // Check which tools were used
   const allToolCalls = steps?.flatMap(step => step.toolCalls || []) || []
   const searchNewsUsed = allToolCalls.some(call => call.toolName === 'searchNews')
   const audioGenerated = allToolCalls.some(call => call.toolName === 'generateAudio')
@@ -158,20 +143,18 @@ export const processMessage = async (conversationId, userMessage, userId) => {
     console.log('🎵 Audio was generated per user request')
   }
 
-  // Ensure we have text content - fallback if empty after tool usage
+  // shouldn't happen but just in case
   let finalText = text || ''
   if (!finalText && steps?.length > 1) {
     console.log('⚠️ Empty text after tool usage - this should not happen with stopWhen')
     finalText = 'I completed the requested action. Please let me know if you need anything else!'
   }
 
-  // Update message with final text
   await prisma.message.update({
     where: { id: assistantMsg.id },
     data: { content: finalText }
   })
 
-  // Get the audio URL if it was generated
   const audioUrl = audioGenerated ?
     (await prisma.message.findUnique({ where: { id: assistantMsg.id } }))?.audioUrl :
     null
