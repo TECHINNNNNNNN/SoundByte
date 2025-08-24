@@ -1,5 +1,97 @@
 @import "tailwindcss";
 
+/*
+  Local font setup
+  PURPOSE: Register variable fonts bundled in src/assets/fonts and expose
+  semantic tokens for UI and display typography across the app.
+  USAGE: Apply `.font-display` for large headings/brand, body uses UI font by default.
+  PERFORMANCE: Use font-display: swap to avoid FOIT; keep file count minimal.
+*/
+/* Inter Variable (UI font) */
+@font-face {
+  font-family: "InterVariable";
+  src: url("./assets/fonts/Inter-VariableFont_opsz,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "InterVariable";
+  src: url("./assets/fonts/Inter-Italic-VariableFont_opsz,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Plus Jakarta Sans Variable (Display font) */
+@font-face {
+  font-family: "PlusJakartaSansVariable";
+  src: url("./assets/fonts/PlusJakartaSans-VariableFont_wght.ttf") format("truetype");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "PlusJakartaSansVariable";
+  src: url("./assets/fonts/PlusJakartaSans-Italic-VariableFont_wght.ttf") format("truetype");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Ancizar Serif Variable (Accent serif for rare highlights) */
+@font-face {
+  font-family: "AncizarSerifVariable";
+  src: url("./assets/fonts/AncizarSerif-VariableFont_wght.ttf") format("truetype");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "AncizarSerifVariable";
+  src: url("./assets/fonts/AncizarSerif-Italic-VariableFont_wght.ttf") format("truetype");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Global font tokens */
+@layer base {
+  :root {
+    /* Primary UI font: crisp, highly readable */
+    --font-ui: "InterVariable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+    /* Display font for premium headings */
+    --font-display: "PlusJakartaSansVariable", "InterVariable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    /* Accent serif for occasional highlights/quotes if needed */
+    --font-serifDisplay: "AncizarSerifVariable", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  }
+
+  html, body {
+    font-family: var(--font-ui);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Elevate headings with display font by default; override per-component as needed */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+
+  /* Serif accent for quotes and pull-quotes */
+  blockquote, q {
+    font-family: var(--font-serifDisplay);
+    font-style: italic;
+  }
+}
+
+/* Utility font classes for explicit control */
+@layer utilities {
+  .font-ui { font-family: var(--font-ui) !important; }
+  .font-display { font-family: var(--font-display) !important; }
+  .font-serifdisplay { font-family: var(--font-serifDisplay) !important; }
+}
+
 /* Smooth gradient mesh animations - optimized for performance */
 @keyframes float-slow {
   0%, 100% {

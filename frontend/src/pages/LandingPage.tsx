@@ -126,7 +126,7 @@ export default function LandingPage() {
             {/* Left: Headline + CTA */}
             <div className="space-y-8">
               <div>
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-gray-900 leading-[1.05]">
+                <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-gray-900 leading-[1.05]">
                   <span className="block">News that</span>
                   <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">speaks to you</span>
                 </h1>
@@ -213,7 +213,7 @@ export default function LandingPage() {
       <section id="features" className="py-20 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10">
-            <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4 hover:tracking-wide transition-all duration-300">
+            <h2 className="font-display text-5xl lg:text-6xl font-bold text-gray-900 mb-4 hover:tracking-wide transition-all duration-300">
               Designed for listeners
             </h2>
             <p className="text-xl text-gray-600 hover:text-gray-900 transition-colors">
@@ -319,7 +319,7 @@ export default function LandingPage() {
       <section className="py-20 px-6 lg:px-8 bg-white/40 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4 hover:tracking-wide transition-all duration-300">
+            <h2 className="font-display text-5xl lg:text-6xl font-bold text-gray-900 mb-4 hover:tracking-wide transition-all duration-300">
               Simple as 1-2-3
             </h2>
             <p className="text-xl text-gray-600 hover:text-gray-900 transition-colors">
@@ -373,7 +373,7 @@ export default function LandingPage() {
       {/* CTA Section - Clean Apple style */}
       <section className="py-32 px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 hover:tracking-wide transition-all duration-300">
+          <h2 className="font-display text-5xl lg:text-6xl font-bold text-gray-900 mb-6 hover:tracking-wide transition-all duration-300">
             Ready to transform
             <span className="block">how you consume news?</span>
           </h2>
