@@ -1,10 +1,19 @@
 // Text-to-Speech Service - Google Cloud TTS
 import { TextToSpeechClient } from '@google-cloud/text-to-speech'
+import { getGCPCredentials, validateGCPCredentials } from '../config/gcp-credentials.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-const client = new TextToSpeechClient()
+// Validate credentials are available
+try {
+  validateGCPCredentials()
+} catch (error) {
+  console.error('TTS Service initialization error:', error.message)
+}
+
+// Initialize client with proper credentials
+const client = new TextToSpeechClient(getGCPCredentials())
 
 /**
  * Generate audio from text using Google TTS
