@@ -50,6 +50,14 @@ const Register = () => {
         setIsLoading(false);
     }
 
+    // OAuth login
+    const handleOAuthLogin = async (provider: string) => {
+        const apiUrl = import.meta.env.PROD
+            ? import.meta.env.VITE_API_URL
+            : (import.meta.env.VITE_API_URL || 'http://localhost:3000/api');
+        window.location.href = `${apiUrl}/auth/${provider}`;
+    }
+
     return (
         <div className="min-h-screen flex items-center justify-center relative py-12 px-4 sm:px-6 lg:px-8">
             <GradientMesh />
@@ -183,7 +191,7 @@ const Register = () => {
                                 </span>
                             </label>
                         </div>
-                        
+
                         <button
                             type="submit"
                             disabled={isLoading}
@@ -220,6 +228,7 @@ const Register = () => {
                     <div className="grid grid-cols-2 gap-3">
                         <button
                             type="button"
+                            onClick={() => handleOAuthLogin('google')}
                             className="flex justify-center items-center py-3 px-4 border border-gray-200 rounded-xl shadow-sm font-medium text-gray-700 bg-white hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:border-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 hover:shadow-soft group"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -230,9 +239,10 @@ const Register = () => {
                             </svg>
                             <span className="ml-2 group-hover:text-purple-700 transition-colors">Google</span>
                         </button>
-                        
+
                         <button
                             type="button"
+                            onClick={() => handleOAuthLogin('github')}
                             className="flex justify-center items-center py-3 px-4 border border-gray-200 rounded-xl shadow-sm font-medium text-gray-700 bg-white hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:border-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 hover:shadow-soft group"
                         >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
