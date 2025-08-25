@@ -18,11 +18,20 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     }
 
     // Create checkout session
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    const frontendUrl = isDevelopment 
+      ? 'http://localhost:5173'
+      : process.env.FRONTEND_URL;
+    
+    if (!isDevelopment && !frontendUrl) {
+      throw new Error('FRONTEND_URL environment variable is required in production');
+    }
+    
     const session = await stripeService.createCheckoutSession(
       userId,
       email,
-      `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      `${process.env.FRONTEND_URL}/payment/canceled`
+      `${frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      `${frontendUrl}/payment/canceled`
     );
 
     res.json({ url: session.url });
@@ -37,9 +46,18 @@ router.post('/create-portal-session', authenticateToken, async (req, res) => {
   try {
     const { id: userId } = req.user;
 
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    const frontendUrl = isDevelopment 
+      ? 'http://localhost:5173'
+      : process.env.FRONTEND_URL;
+    
+    if (!isDevelopment && !frontendUrl) {
+      throw new Error('FRONTEND_URL environment variable is required in production');
+    }
+    
     const session = await stripeService.createPortalSession(
       userId,
-      `${process.env.FRONTEND_URL}/profile`
+      `${frontendUrl}/profile`
     );
 
     res.json({ url: session.url });

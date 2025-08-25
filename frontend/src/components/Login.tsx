@@ -48,7 +48,10 @@ const Login = () => {
     }
 
     const handleOAuthLogin = async (provider: string) => {
-        window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/${provider}`;
+        const apiUrl = import.meta.env.PROD 
+            ? import.meta.env.VITE_API_URL 
+            : (import.meta.env.VITE_API_URL || 'http://localhost:3000/api');
+        window.location.href = `${apiUrl}/auth/${provider}`;
     }
 
     return (

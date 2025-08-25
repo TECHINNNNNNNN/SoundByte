@@ -277,7 +277,10 @@ router.get('/google/callback',
             })
 
             // Redirect without exposing tokens in URL
-            res.redirect(`${process.env.CLIENT_URL}/auth/callback?success=true`)
+            const clientUrl = process.env.NODE_ENV === 'production' 
+                ? process.env.CLIENT_URL 
+                : (process.env.CLIENT_URL || 'http://localhost:5173');
+            res.redirect(`${clientUrl}/auth/callback?success=true`)
 
         } catch (error) {
             console.error("Error in Google login callback:", error)
@@ -318,7 +321,10 @@ router.get('/github/callback',
             })
 
             // Redirect without exposing tokens in URL
-            res.redirect(`${process.env.CLIENT_URL}/auth/callback?success=true`)
+            const clientUrl = process.env.NODE_ENV === 'production' 
+                ? process.env.CLIENT_URL 
+                : (process.env.CLIENT_URL || 'http://localhost:5173');
+            res.redirect(`${clientUrl}/auth/callback?success=true`)
 
         } catch (error) {
             console.error("Error in Github login callback:", error)

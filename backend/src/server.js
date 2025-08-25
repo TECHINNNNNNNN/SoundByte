@@ -32,10 +32,32 @@ app.use(limiter)
 // webhooks need raw body
 app.use("/api/webhooks", webhookRoutes)
 
-app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+// CORS configuration that supports multiple origins
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or Postman)
+        if (!origin) return callback(null, true);
+        
+        // In production, use the environment variable
+        // In development, allow localhost origins
+        const allowedOrigins = process.env.NODE_ENV === 'production' 
+            ? [process.env.CLIENT_URL || process.env.FRONTEND_URL].filter(Boolean)
+            : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'];
+        
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.warn(`CORS blocked origin: ${origin}`);
+            callback(null, false);
+        }
+    },
     credentials: true,
-}))
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range']
+};
+
+app.use(cors(corsOptions))
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -78,11 +100,18 @@ app.use((_req, res) => {
 
 import { startScheduler } from './services/scheduler.service.js'
 
-app.listen(PORT, () => {
-    console.log(`🚀 SoundByte API running on port ${PORT}`);
-    console.log(`📱 Frontend URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
-    console.log(`🏥 Health check: http://localhost:${PORT}/health`);
-    
-    // Start the digest scheduler
-    startScheduler()
-})
+// For Vercel deployment
+if (process.env.VERCEL) {
+    // In Vercel serverless environment, we export the app
+    export default app;
+} else {
+    // For local development and traditional hosting
+    app.listen(PORT, () => {
+        console.log(`🚀 SoundByte API running on port ${PORT}`);
+        console.log(`📱 Frontend URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
+        console.log(`🏥 Health check: http://localhost:${PORT}/health`);
+        
+        // Start the digest scheduler
+        startScheduler()
+    })
+}
