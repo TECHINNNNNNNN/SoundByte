@@ -19,6 +19,10 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3000
 
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: process.env.NODE_ENV === 'production' ? 100 : 1000, // 1000 for dev, 100 for prod
