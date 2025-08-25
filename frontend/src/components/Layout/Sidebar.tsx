@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import conversationService, { type Conversation } from '../../services/conversation.service'
+import toast from 'react-hot-toast'
+import SoundByteLoader from '../SoundByteLoader'
 
 interface SidebarProps {
     onNewConversation: () => void
@@ -24,6 +26,7 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
             setConversations(data)
         } catch (error) {
             console.error('Failed to load conversations:', error)
+            toast.error('Failed to load conversations')
         } finally {
             setLoading(false)
         }
@@ -39,11 +42,13 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
             try {
                 await conversationService.deleteConversation(id)
                 setConversations(conversations.filter(c => c.id !== id))
+                toast.success('Conversation deleted')
                 if (conversationId === id) {
                     navigate('/playground')
                 }
             } catch (error) {
                 console.error('Failed to delete conversation:', error)
+                toast.error('Failed to delete conversation')
             }
         }
     }
@@ -67,7 +72,7 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
             <div className="flex-1 overflow-y-auto p-4">
                 {loading ? (
                     <div className="flex justify-center items-center h-32">
-                        <div className="w-8 h-8 border-3 border-purple-200 rounded-full animate-spin border-t-purple-600"></div>
+                        <SoundByteLoader size="small" />
                     </div>
                 ) : conversations.length === 0 ? (
                     <div className="text-center py-8">

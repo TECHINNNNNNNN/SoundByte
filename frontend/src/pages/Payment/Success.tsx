@@ -1,10 +1,14 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Show success toast
+    toast.success('Payment successful! Your Pro subscription is now active. 🎉');
+    
     // Redirect to profile after 3 seconds with success flag
     const timer = setTimeout(() => {
       navigate('/profile?payment=success');

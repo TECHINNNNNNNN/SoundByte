@@ -1,10 +1,21 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const PaymentCanceled = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Show warning toast
+    toast('Payment canceled. No charges were made.', {
+      icon: '⚠️',
+      style: {
+        background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+        border: '1px solid #fcd34d',
+        color: '#92400e',
+      },
+    });
+    
     // Redirect to profile after 3 seconds
     const timer = setTimeout(() => {
       navigate('/profile');
