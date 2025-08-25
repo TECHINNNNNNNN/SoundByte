@@ -6,6 +6,8 @@ import MessageList from './MessageList'
 import MessageInput from './MessageInput'
 import toast from 'react-hot-toast'
 import SoundByteLoader from '../SoundByteLoader'
+import AssistantStatus from './AssistantStatus'
+import useProgressStatus from '../../hooks/useProgressStatus'
 
 const ChatInterface = () => {
     const { conversationId } = useParams<{ conversationId: string }>()
@@ -13,7 +15,7 @@ const ChatInterface = () => {
     const [messages, setMessages] = useState<Message[]>([])
     const [loading, setLoading] = useState(false)
     const [sending, setSending] = useState(false)
-    const [aiStatus, setAiStatus] = useState<string>('')
+    const { text: aiStatus, start: startStatus, finish: finishStatus, fail: failStatus, reset: resetStatus } = useProgressStatus()
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
 
@@ -56,16 +58,12 @@ const ChatInterface = () => {
             const userMessage = await conversationService.addMessage(conversationId, content, 'user')
             setMessages(prev => [...prev, userMessage])
 
-            const isNewsQuery = content.toLowerCase().includes('news') ||
-                content.toLowerCase().includes('latest') ||
-                content.toLowerCase().includes('today')
-            setAiStatus(isNewsQuery
-                ? '🔍 Researching news and generating audio... (this may take a minute)'
-                : '💭 Generating response...')
+
+            startStatus()
 
             const aiResponse = await aiService.sendMessage(conversationId, content)
 
-            setAiStatus('')
+            finishStatus()
             const assistantMessage: Message = {
                 id: aiResponse.messageId,
                 conversationId,
@@ -79,16 +77,15 @@ const ChatInterface = () => {
             console.error('Failed to send message:', error)
             if (error.response?.status === 403) {
                 const errorMsg = error.response.data.error
-                setAiStatus(`⚠️ ${errorMsg}`)
+                failStatus(errorMsg)
                 toast.error(errorMsg)
             } else {
-                setAiStatus('❌ Something went wrong. Please try again.')
+                failStatus('Something went wrong. Please try again.')
                 toast.error('Failed to send message. Please try again.')
             }
-            setTimeout(() => setAiStatus(''), 5000)
         } finally {
             setSending(false)
-            setAiStatus('')
+            resetStatus()
         }
     }
 
@@ -121,11 +118,7 @@ const ChatInterface = () => {
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto">
                 <MessageList messages={messages} />
-                {aiStatus && (
-                    <div className="px-6 py-4 text-gray-500 italic">
-                        {aiStatus}
-                    </div>
-                )}
+                <AssistantStatus text={aiStatus} />
                 <div ref={messagesEndRef} />
             </div>
 
