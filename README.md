@@ -10,7 +10,7 @@ I built SoundByte after falling in love with Google's NotebookLM and its ability
 
 Watch the terminal demo on the landing page, or create an account to generate your first AI podcast.
 
-![SoundByte Dashboard](Screenshot%202025-08-25%20113954.png)
+![SoundByte](https://drive.google.com/file/d/1rUO5Hy7KIvjLgtV6Gy0EICH3J4Iff_F_/view?usp=sharing)
 
 ## 💭 Why I Built This
 
