@@ -6,6 +6,7 @@ import GradientMesh from '../components/GradientMesh'
 import { useSubscription } from '../hooks/useSubscription'
 import { createCheckoutSession, createPortalSession } from '../services/stripe'
 import toast from 'react-hot-toast'
+import SoundByteLoader from '../components/SoundByteLoader'
 
 const Profile = () => {
   const { user } = useAuth()
@@ -114,7 +115,9 @@ const Profile = () => {
               <h3 className="text-lg font-semibold mb-4">Subscription</h3>
 
               {isLoading ? (
-                <p className="text-gray-600">Loading subscription data...</p>
+                <div className="flex justify-center py-8">
+                  <SoundByteLoader size="small" message="Loading subscription..." />
+                </div>
               ) : (
                 <div className="space-y-4">
                   {/* Subscription Status */}

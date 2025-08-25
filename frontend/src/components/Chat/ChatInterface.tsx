@@ -6,6 +6,7 @@ import MessageList from './MessageList'
 import MessageInput from './MessageInput'
 import SoundByteIcon from '../SoundByteIcon'
 import toast from 'react-hot-toast'
+import SoundByteLoader from '../SoundByteLoader'
 
 const ChatInterface = () => {
     const { conversationId } = useParams<{ conversationId: string }>()
@@ -95,7 +96,7 @@ const ChatInterface = () => {
     if (loading) {
         return (
             <div className="h-full flex items-center justify-center">
-                <SoundByteIcon size={100} animated={true} />
+                <SoundByteLoader size="medium" message="Loading conversation..." />
             </div>
         )
     }

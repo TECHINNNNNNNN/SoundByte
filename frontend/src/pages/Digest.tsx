@@ -6,6 +6,7 @@ import GradientMesh from "../components/GradientMesh";
 import SoundByteIcon from "../components/SoundByteIcon";
 import AudioPlayer from "../components/AudioPlayer";
 import toast from 'react-hot-toast';
+import SoundByteLoader from '../components/SoundByteLoader';
 
 const Digest = () => {
     const { digestId } = useParams();
@@ -35,10 +36,7 @@ const Digest = () => {
     if (isLoading) {
         return (
             <div className="min-h-screen flex justify-center items-center">
-                <div className="relative">
-                    <div className="w-20 h-20 border-4 border-purple-200 rounded-full animate-spin border-t-purple-600"></div>
-                    <div className="absolute inset-0 w-20 h-20 border-4 border-transparent rounded-full animate-ping border-t-purple-400"></div>
-                </div>
+                <SoundByteLoader size="large" message="Loading digest details..." />
             </div>
         );
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import conversationService, { type Conversation } from '../../services/conversation.service'
 import toast from 'react-hot-toast'
+import SoundByteLoader from '../SoundByteLoader'
 
 interface SidebarProps {
     onNewConversation: () => void
@@ -71,7 +72,7 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
             <div className="flex-1 overflow-y-auto p-4">
                 {loading ? (
                     <div className="flex justify-center items-center h-32">
-                        <div className="w-8 h-8 border-3 border-purple-200 rounded-full animate-spin border-t-purple-600"></div>
+                        <SoundByteLoader size="small" />
                     </div>
                 ) : conversations.length === 0 ? (
                     <div className="text-center py-8">
