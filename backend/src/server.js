@@ -100,18 +100,12 @@ app.use((_req, res) => {
 
 import { startScheduler } from './services/scheduler.service.js'
 
-// For Vercel deployment
-if (process.env.VERCEL) {
-    // In Vercel serverless environment, we export the app
-    export default app;
-} else {
-    // For local development and traditional hosting
-    app.listen(PORT, () => {
-        console.log(`🚀 SoundByte API running on port ${PORT}`);
-        console.log(`📱 Frontend URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
-        console.log(`🏥 Health check: http://localhost:${PORT}/health`);
-        
-        // Start the digest scheduler
-        startScheduler()
-    })
-}
+// Start the server
+app.listen(PORT, () => {
+    console.log(`🚀 SoundByte API running on port ${PORT}`);
+    console.log(`📱 Frontend URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
+    console.log(`🏥 Health check: http://localhost:${PORT}/health`);
+    
+    // Start the digest scheduler
+    startScheduler()
+})
