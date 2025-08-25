@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import conversationService, { type Conversation } from '../../services/conversation.service'
+import toast from 'react-hot-toast'
 
 interface SidebarProps {
     onNewConversation: () => void
@@ -24,6 +25,7 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
             setConversations(data)
         } catch (error) {
             console.error('Failed to load conversations:', error)
+            toast.error('Failed to load conversations')
         } finally {
             setLoading(false)
         }
@@ -39,11 +41,13 @@ const Sidebar = ({ onNewConversation, refreshTrigger = 0 }: SidebarProps) => {
             try {
                 await conversationService.deleteConversation(id)
                 setConversations(conversations.filter(c => c.id !== id))
+                toast.success('Conversation deleted')
                 if (conversationId === id) {
                     navigate('/playground')
                 }
             } catch (error) {
                 console.error('Failed to delete conversation:', error)
+                toast.error('Failed to delete conversation')
             }
         }
     }

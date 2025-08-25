@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import toast from 'react-hot-toast';
 
 
 const Login = () => {
@@ -33,9 +34,12 @@ const Login = () => {
         const result = await login(formData.email, formData.password);
 
         if (result.success) {
+            toast.success('Welcome back! 🎉');
             navigate(from, { replace: true });
         } else {
-            setError(result.error || "Login failed. Please try again.");
+            const errorMessage = result.error || "Login failed. Please try again.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
 
         setIsLoading(false);

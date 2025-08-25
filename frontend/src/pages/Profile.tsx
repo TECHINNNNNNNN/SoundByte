@@ -5,6 +5,7 @@ import SoundByteIcon from '../components/SoundByteIcon'
 import GradientMesh from '../components/GradientMesh'
 import { useSubscription } from '../hooks/useSubscription'
 import { createCheckoutSession, createPortalSession } from '../services/stripe'
+import toast from 'react-hot-toast'
 
 const Profile = () => {
   const { user } = useAuth()
@@ -30,21 +31,23 @@ const Profile = () => {
 
   const handleUpgrade = async () => {
     try {
+      toast.loading('Redirecting to checkout...', { duration: 2000 })
       const checkoutUrl = await createCheckoutSession()
       window.location.href = checkoutUrl
     } catch (error) {
       console.error('Failed to create checkout session:', error)
-      alert('Failed to start checkout. Please try again.')
+      toast.error('Failed to start checkout. Please try again.')
     }
   }
 
   const handleManageSubscription = async () => {
     try {
+      toast.loading('Opening subscription portal...', { duration: 2000 })
       const portalUrl = await createPortalSession()
       window.location.href = portalUrl
     } catch (error) {
       console.error('Failed to create portal session:', error)
-      alert('Failed to open subscription management. Please try again.')
+      toast.error('Failed to open subscription management. Please try again.')
     }
   }
 
@@ -143,7 +146,7 @@ const Profile = () => {
 
                     {percentageUsed > 80 && (
                       <p className="text-sm text-red-600 mt-1">
-                        Warning: You've used {percentageUsed}% of your monthly tokens
+                        Warning: You've used {percentageUsed.toFixed(0)}% of your monthly tokens
                       </p>
                     )}
                   </div>

@@ -5,6 +5,7 @@ import aiService from '../../services/ai.service'
 import MessageList from './MessageList'
 import MessageInput from './MessageInput'
 import SoundByteIcon from '../SoundByteIcon'
+import toast from 'react-hot-toast'
 
 const ChatInterface = () => {
     const { conversationId } = useParams<{ conversationId: string }>()
@@ -36,6 +37,7 @@ const ChatInterface = () => {
             setMessages(data.messages || [])
         } catch (error) {
             console.error('Failed to load conversation:', error)
+            toast.error('Failed to load conversation')
         } finally {
             setLoading(false)
         }
@@ -76,9 +78,12 @@ const ChatInterface = () => {
         } catch (error: any) {
             console.error('Failed to send message:', error)
             if (error.response?.status === 403) {
-                setAiStatus(`⚠️ ${error.response.data.error}`)
+                const errorMsg = error.response.data.error
+                setAiStatus(`⚠️ ${errorMsg}`)
+                toast.error(errorMsg)
             } else {
                 setAiStatus('❌ Something went wrong. Please try again.')
+                toast.error('Failed to send message. Please try again.')
             }
             setTimeout(() => setAiStatus(''), 5000)
         } finally {

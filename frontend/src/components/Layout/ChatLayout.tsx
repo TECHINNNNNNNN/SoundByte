@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import conversationService from '../../services/conversation.service'
 import GradientMesh from '../GradientMesh'
 import SoundByteIcon from '../SoundByteIcon'
+import toast from 'react-hot-toast'
 
 const ChatLayout = () => {
     const { user, logout } = useAuth()
@@ -18,9 +19,11 @@ const ChatLayout = () => {
             const title = `New Chat ${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
             const conversation = await conversationService.createConversation(title)
             setRefreshTrigger(prev => prev + 1) // Trigger sidebar refresh
+            toast.success('New conversation created!')
             navigate(`/playground/chat/${conversation.id}`)
         } catch (error) {
             console.error('Failed to create conversation:', error)
+            toast.error('Failed to create conversation')
         }
     }
 

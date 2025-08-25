@@ -5,6 +5,7 @@ import type { Digest, DigestDelivery } from "../services/digest.service";
 import GradientMesh from "../components/GradientMesh";
 import SoundByteIcon from "../components/SoundByteIcon";
 import AudioPlayer from "../components/AudioPlayer";
+import toast from 'react-hot-toast';
 
 const Digest = () => {
     const { digestId } = useParams();
@@ -23,6 +24,7 @@ const Digest = () => {
                 setDeliveries(digest.deliveries || []);
             } catch (error) {
                 console.error('Failed to fetch digest:', error);
+                toast.error('Failed to load digest details');
             } finally {
                 setIsLoading(false);
             }
@@ -57,10 +59,15 @@ const Digest = () => {
         );
     }
 
-    const handleDelete = (id: string) => {
-        digestService.deleteAudio(id).then(() => {
+    const handleDelete = async (id: string) => {
+        try {
+            await digestService.deleteAudio(id);
             setDeliveries(prev => prev.filter(delivery => delivery.id !== id));
-        })
+            toast.success('Audio deleted successfully');
+        } catch (error) {
+            console.error('Failed to delete audio:', error);
+            toast.error('Failed to delete audio. Please try again.');
+        }
     }
 
     return (

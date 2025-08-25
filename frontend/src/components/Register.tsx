@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 
 const Register = () => {
@@ -27,6 +28,7 @@ const Register = () => {
 
         if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match");
+            toast.error("Passwords do not match");
             return;
         }
 
@@ -35,9 +37,12 @@ const Register = () => {
         const result = await register(formData.name, formData.email, formData.password);
 
         if (result.success) {
+            toast.success('Account created successfully! Please sign in.');
             navigate('/login', { replace: true });
         } else {
-            setError(result.error || "Registration failed. Please try again.");
+            const errorMessage = result.error || "Registration failed. Please try again.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
 
         setIsLoading(false);

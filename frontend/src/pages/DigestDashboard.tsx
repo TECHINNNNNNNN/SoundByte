@@ -5,6 +5,7 @@ import GradientMesh from '../components/GradientMesh'
 import SoundByteIcon from '../components/SoundByteIcon'
 import AudioPlayer from '../components/AudioPlayer'
 import { z } from 'zod'
+import toast from 'react-hot-toast'
 
 const createDigestSchema = z.object({
   title: z.string().trim().min(1, { message: 'Title is required' }).max(255, { message: 'Title must be less than 255 characters' }),
@@ -50,6 +51,7 @@ export default function DigestDashboard() {
       setDigests(data)
     } catch (error) {
       console.error('Failed to fetch digests:', error)
+      toast.error('Failed to load your digests. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -61,6 +63,7 @@ export default function DigestDashboard() {
       createDigestSchema.parse(formData)
       setFormError({})
       await digestService.createDigest(formData)
+      toast.success('Digest created successfully! 🎉')
       setShowForm(false)
       setFormData({
         title: '',
@@ -80,8 +83,10 @@ export default function DigestDashboard() {
           errors[field] = issue.message
         })
         setFormError(errors)
+        toast.error('Please fix the form errors and try again.')
       } else {
         console.error('Failed to create digest:', error)
+        toast.error('Failed to create digest. Please try again.')
       }
     }
   }
@@ -90,18 +95,22 @@ export default function DigestDashboard() {
     if (!confirm('Delete this digest?')) return
     try {
       await digestService.deleteDigest(id)
+      toast.success('Digest deleted successfully')
       fetchDigests()
     } catch (error) {
       console.error('Failed to delete:', error)
+      toast.error('Failed to delete digest. Please try again.')
     }
   }
 
   const toggleActive = async (digest: Digest) => {
     try {
       await digestService.updateDigest(digest.id, { isActive: !digest.isActive })
+      toast.success(`Digest ${!digest.isActive ? 'activated' : 'paused'} successfully`)
       fetchDigests()
     } catch (error) {
       console.error('Failed to update:', error)
+      toast.error('Failed to update digest status. Please try again.')
     }
   }
 
@@ -112,12 +121,10 @@ export default function DigestDashboard() {
 
       // Refresh to show new delivery
       await fetchDigests()
-
-      // Show success message
-      alert(`Digest generated successfully! Audio has been sent to your email.`)
+      toast.success('Digest generated successfully! Audio has been sent to your email.')
     } catch (error) {
       console.error('Failed to generate:', error)
-      alert('Failed to generate digest. Please try again.')
+      toast.error('Failed to generate digest. Please try again.')
     } finally {
       setGeneratingId(null)
     }
