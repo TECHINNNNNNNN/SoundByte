@@ -4,7 +4,6 @@ import conversationService, { type Conversation, type Message } from '../../serv
 import aiService from '../../services/ai.service'
 import MessageList from './MessageList'
 import MessageInput from './MessageInput'
-import SoundByteIcon from '../SoundByteIcon'
 import toast from 'react-hot-toast'
 import SoundByteLoader from '../SoundByteLoader'
 

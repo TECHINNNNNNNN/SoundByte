@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import digestService from "../services/digest.service";
 import { useEffect, useState } from "react";
-import type { Digest, DigestDelivery } from "../services/digest.service";
+import type { Digest as DigestType, DigestDelivery } from "../services/digest.service";
 import GradientMesh from "../components/GradientMesh";
 import SoundByteIcon from "../components/SoundByteIcon";
 import AudioPlayer from "../components/AudioPlayer";
@@ -11,7 +11,7 @@ import SoundByteLoader from '../components/SoundByteLoader';
 const Digest = () => {
     const { digestId } = useParams();
     const navigate = useNavigate();
-    const [digest, setDigest] = useState<Digest | null>(null);
+    const [digest, setDigest] = useState<DigestType | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
     const [deliveries, setDeliveries] = useState<DigestDelivery[]>([]);
