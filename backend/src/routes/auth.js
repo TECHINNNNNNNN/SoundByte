@@ -292,10 +292,11 @@ router.get('/google/callback',
                 : (process.env.CLIENT_URL || 'http://localhost:5173');
             // Create temporary auth code (valid for 1 minute)
             const authCode = Buffer.from(`${req.user.id}:${Date.now()}`).toString('base64');
-            // Store tokens temporarily with auth code as key
+            // Store tokens temporarily with auth code as key (valid for 5 minutes)
             global.tempAuthTokens = global.tempAuthTokens || {};
-            global.tempAuthTokens[authCode] = { accessToken, refreshToken, expires: Date.now() + 60000 };
-            res.redirect(`${clientUrl}/auth/callback?success=true&code=${authCode}`)
+            global.tempAuthTokens[authCode] = { accessToken, refreshToken, expires: Date.now() + 300000 }; // 5 minutes
+            console.log('OAuth: Created auth code for exchange');
+            res.redirect(`${clientUrl}/auth/callback?success=true&code=${encodeURIComponent(authCode)}`)
 
         } catch (error) {
             console.error("Error in Google login callback:", error)
@@ -341,10 +342,11 @@ router.get('/github/callback',
                 : (process.env.CLIENT_URL || 'http://localhost:5173');
             // Create temporary auth code (valid for 1 minute)
             const authCode = Buffer.from(`${req.user.id}:${Date.now()}`).toString('base64');
-            // Store tokens temporarily with auth code as key
+            // Store tokens temporarily with auth code as key (valid for 5 minutes)
             global.tempAuthTokens = global.tempAuthTokens || {};
-            global.tempAuthTokens[authCode] = { accessToken, refreshToken, expires: Date.now() + 60000 };
-            res.redirect(`${clientUrl}/auth/callback?success=true&code=${authCode}`)
+            global.tempAuthTokens[authCode] = { accessToken, refreshToken, expires: Date.now() + 300000 }; // 5 minutes
+            console.log('OAuth: Created auth code for exchange');
+            res.redirect(`${clientUrl}/auth/callback?success=true&code=${encodeURIComponent(authCode)}`)
 
         } catch (error) {
             console.error("Error in Github login callback:", error)
@@ -358,7 +360,10 @@ router.post('/exchange', async (req, res) => {
     try {
         const { code } = req.body;
         
+        console.log('Exchange: Attempting to exchange auth code');
+        
         if (!code) {
+            console.log('Exchange: No auth code provided');
             return res.status(400).json({ message: "Auth code is required" });
         }
         
@@ -367,6 +372,7 @@ router.post('/exchange', async (req, res) => {
             const now = Date.now();
             Object.keys(global.tempAuthTokens).forEach(key => {
                 if (global.tempAuthTokens[key].expires < now) {
+                    console.log('Exchange: Cleaning up expired code');
                     delete global.tempAuthTokens[key];
                 }
             });
@@ -376,11 +382,16 @@ router.post('/exchange', async (req, res) => {
         const tokens = global.tempAuthTokens?.[code];
         
         if (!tokens) {
+            console.log('Exchange: Auth code not found or expired', {
+                providedCode: code.substring(0, 20) + '...',
+                availableCodes: Object.keys(global.tempAuthTokens || {}).length
+            });
             return res.status(401).json({ message: "Invalid or expired auth code" });
         }
         
         // Remove from temporary storage
         delete global.tempAuthTokens[code];
+        console.log('Exchange: Successfully exchanged auth code for tokens');
         
         // Return tokens
         res.json({

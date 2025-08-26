@@ -42,13 +42,16 @@ const corsOptions = {
         // Allow requests with no origin (like mobile apps or Postman)
         if (!origin) return callback(null, true);
         
-        // In production, use the environment variable
+        // In production, allow main URL and Vercel preview deployments
         // In development, allow localhost origins
         const allowedOrigins = process.env.NODE_ENV === 'production' 
             ? [process.env.CLIENT_URL || process.env.FRONTEND_URL].filter(Boolean)
             : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'];
         
-        if (allowedOrigins.includes(origin)) {
+        // Also allow Vercel preview deployments
+        const isVercelPreview = origin && origin.includes('.vercel.app');
+        
+        if (allowedOrigins.includes(origin) || isVercelPreview) {
             callback(null, true);
         } else {
             console.warn(`CORS blocked origin: ${origin}`);
