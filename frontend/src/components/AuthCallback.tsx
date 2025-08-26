@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { tokenManager } from "../services/tokenManager";
@@ -8,6 +8,7 @@ const AuthCallback = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { checkAuth } = useAuth();
+    const hasExchangedCode = useRef(false);
 
     useEffect(() => {
         const handleOAuthCallback = async () => {
@@ -24,7 +25,10 @@ const AuthCallback = () => {
                 // Check if we have an auth code to exchange for tokens
                 const authCode = searchParams.get("code");
                 
-                if (authCode) {
+                if (authCode && !hasExchangedCode.current) {
+                    // Mark as attempted immediately to prevent double execution
+                    hasExchangedCode.current = true;
+                    
                     // Exchange auth code for tokens (for cross-domain support)
                     try {
                         const response = await api.post('/auth/exchange', { code: authCode });
