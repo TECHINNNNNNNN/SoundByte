@@ -1,7 +1,7 @@
 // Token state stored in closure
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
-let refreshTimer: NodeJS.Timeout | null = null;
+let refreshTimer: number | null = null;
 
 // Pure functions for token operations
 const loadTokens = (): void => {
@@ -35,7 +35,7 @@ const scheduleRefresh = (): void => {
     if (refreshTimer) {
         clearTimeout(refreshTimer);
     }
-    refreshTimer = setTimeout(() => {
+    refreshTimer = window.setTimeout(() => {
         refreshAccessToken();
     }, 14 * 60 * 1000); // 14 minutes
 };
