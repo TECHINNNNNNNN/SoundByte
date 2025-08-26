@@ -25,10 +25,12 @@ if (process.env.NODE_ENV === 'production') {
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'production' ? 100 : 1000, // 1000 for dev, 100 for prod
+
+    max: process.env.NODE_ENV === 'production' ? Number(process.env.RATE_LIMIT_MAX || 2000) : 1000,
     message: "Too many requests, please try again later.",
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS' || req.path === '/health',
 })
 
 app.use(limiter)
@@ -41,16 +43,16 @@ const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or Postman)
         if (!origin) return callback(null, true);
-        
+
         // In production, allow main URL and Vercel preview deployments
         // In development, allow localhost origins
-        const allowedOrigins = process.env.NODE_ENV === 'production' 
+        const allowedOrigins = process.env.NODE_ENV === 'production'
             ? [process.env.CLIENT_URL || process.env.FRONTEND_URL].filter(Boolean)
             : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'];
-        
+
         // Also allow Vercel preview deployments
         const isVercelPreview = origin && origin.includes('.vercel.app');
-        
+
         if (allowedOrigins.includes(origin) || isVercelPreview) {
             callback(null, true);
         } else {
@@ -112,7 +114,7 @@ app.listen(PORT, () => {
     console.log(`🚀 SoundByte API running on port ${PORT}`);
     console.log(`📱 Frontend URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
     console.log(`🏥 Health check: http://localhost:${PORT}/health`);
-    
+
     // Start the digest scheduler
     startScheduler()
 })
