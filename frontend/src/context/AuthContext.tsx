@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import api, { type User, type AuthResponse, type UserResponse } from '../services/api'
+import { API_URL } from '../config/api'
 import { tokenManager } from '../services/tokenManager'
 
 interface AuthContextType {
@@ -40,7 +41,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const initAuth = async () => {
-            await checkAuth()
+            // Only check cookies when same-origin; otherwise require tokens first
+            let sameOrigin = false
+            try {
+                sameOrigin = new URL(API_URL).origin === window.location.origin
+            } catch { }
+
+            const hasTokens = typeof tokenManager.hasTokens === 'function' && tokenManager.hasTokens()
+
+            if (sameOrigin || hasTokens) {
+                await checkAuth()
+            }
             setIsLoading(false)
         }
         initAuth()

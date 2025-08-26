@@ -132,6 +132,11 @@ class ApiClient {
                         })
                     }
 
+                    // If no refresh token available, bail early
+                    if (!tokenManager.getRefreshToken || !tokenManager.getRefreshToken()) {
+                        return Promise.reject(error)
+                    }
+
                     // Start refresh process
                     this.isRefreshing = true;
 
@@ -152,11 +157,9 @@ class ApiClient {
                     } catch (refreshError) {
                         console.error("Token refresh failed:", refreshError)
 
-                        // Clear any stored auth state in context
+                        // Clear any stored auth state and queued requests; let callers handle navigation
+                        try { tokenManager.clearTokens(); } catch { }
                         this.refreshSubscribers = [];
-
-                        // Redirect to login page
-                        window.location.href = "/login"
                         return Promise.reject(refreshError)
 
                     } finally {
