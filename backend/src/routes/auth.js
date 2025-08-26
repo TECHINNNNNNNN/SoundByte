@@ -290,11 +290,20 @@ router.get('/google/callback',
             const clientUrl = process.env.NODE_ENV === 'production' 
                 ? process.env.CLIENT_URL 
                 : (process.env.CLIENT_URL || 'http://localhost:5173');
-            // Create temporary auth code (valid for 1 minute)
-            const authCode = Buffer.from(`${req.user.id}:${Date.now()}`).toString('base64');
-            // Store tokens temporarily with auth code as key (valid for 5 minutes)
-            global.tempAuthTokens = global.tempAuthTokens || {};
-            global.tempAuthTokens[authCode] = { accessToken, refreshToken, expires: Date.now() + 300000 }; // 5 minutes
+            // Create temporary auth code
+            const authCode = Buffer.from(`${req.user.id}:${Date.now()}:${Math.random()}`).toString('base64');
+            
+            // Store in database instead of memory
+            await prisma.authCode.create({
+                data: {
+                    code: authCode,
+                    userId: req.user.id,
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                    expires: new Date(Date.now() + 300000) // 5 minutes
+                }
+            });
+            
             console.log('OAuth: Created auth code for exchange');
             res.redirect(`${clientUrl}/auth/callback?success=true&code=${encodeURIComponent(authCode)}`)
 
@@ -340,11 +349,20 @@ router.get('/github/callback',
             const clientUrl = process.env.NODE_ENV === 'production' 
                 ? process.env.CLIENT_URL 
                 : (process.env.CLIENT_URL || 'http://localhost:5173');
-            // Create temporary auth code (valid for 1 minute)
-            const authCode = Buffer.from(`${req.user.id}:${Date.now()}`).toString('base64');
-            // Store tokens temporarily with auth code as key (valid for 5 minutes)
-            global.tempAuthTokens = global.tempAuthTokens || {};
-            global.tempAuthTokens[authCode] = { accessToken, refreshToken, expires: Date.now() + 300000 }; // 5 minutes
+            // Create temporary auth code
+            const authCode = Buffer.from(`${req.user.id}:${Date.now()}:${Math.random()}`).toString('base64');
+            
+            // Store in database instead of memory
+            await prisma.authCode.create({
+                data: {
+                    code: authCode,
+                    userId: req.user.id,
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                    expires: new Date(Date.now() + 300000) // 5 minutes
+                }
+            });
+            
             console.log('OAuth: Created auth code for exchange');
             res.redirect(`${clientUrl}/auth/callback?success=true&code=${encodeURIComponent(authCode)}`)
 
@@ -367,36 +385,51 @@ router.post('/exchange', async (req, res) => {
             return res.status(400).json({ message: "Auth code is required" });
         }
         
-        // Clean up expired codes
-        if (global.tempAuthTokens) {
-            const now = Date.now();
-            Object.keys(global.tempAuthTokens).forEach(key => {
-                if (global.tempAuthTokens[key].expires < now) {
-                    console.log('Exchange: Cleaning up expired code');
-                    delete global.tempAuthTokens[key];
+        // Clean up expired codes from database
+        await prisma.authCode.deleteMany({
+            where: {
+                expires: {
+                    lt: new Date()
                 }
-            });
-        }
+            }
+        });
+        console.log('Exchange: Cleaned up expired auth codes');
         
-        // Get tokens from temporary storage
-        const tokens = global.tempAuthTokens?.[code];
+        // Get auth code from database
+        const authCodeRecord = await prisma.authCode.findUnique({
+            where: {
+                code: code
+            }
+        });
         
-        if (!tokens) {
+        if (!authCodeRecord) {
             console.log('Exchange: Auth code not found or expired', {
-                providedCode: code.substring(0, 20) + '...',
-                availableCodes: Object.keys(global.tempAuthTokens || {}).length
+                providedCode: code.substring(0, 20) + '...'
             });
             return res.status(401).json({ message: "Invalid or expired auth code" });
         }
         
-        // Remove from temporary storage
-        delete global.tempAuthTokens[code];
+        // Check if code is expired
+        if (authCodeRecord.expires < new Date()) {
+            console.log('Exchange: Auth code expired');
+            // Delete expired code
+            await prisma.authCode.delete({
+                where: { id: authCodeRecord.id }
+            });
+            return res.status(401).json({ message: "Auth code expired" });
+        }
+        
+        // Delete the auth code after successful retrieval (one-time use)
+        await prisma.authCode.delete({
+            where: { id: authCodeRecord.id }
+        });
+        
         console.log('Exchange: Successfully exchanged auth code for tokens');
         
         // Return tokens
         res.json({
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken
+            accessToken: authCodeRecord.accessToken,
+            refreshToken: authCodeRecord.refreshToken
         });
         
     } catch (error) {

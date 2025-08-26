@@ -156,6 +156,21 @@ model DigestDelivery {
   @@map("digest_deliveries")
 }
 
+// AUTH CODE MODEL FOR OAUTH EXCHANGE
+model AuthCode {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  userId       String
+  accessToken  String   @db.Text
+  refreshToken String   @db.Text
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  
+  @@index([code])
+  @@index([expires])
+  @@map("auth_codes")
+}
+
 // STRIPE & BILLING MODELS
 
 model Subscription {
