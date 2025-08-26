@@ -114,6 +114,11 @@ class ApiClient {
             async (error: AxiosError) => {
                 const originalRequest = error.config as ExtendedAxiosRequestConfig;
 
+                // Don't retry for auth exchange endpoint - auth codes are single use
+                if (originalRequest?.url?.includes('/auth/exchange')) {
+                    return Promise.reject(error);
+                }
+
                 // Check if it's a 401 error and we haven't already tried to refresh
                 if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
                     originalRequest._retry = true;

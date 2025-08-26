@@ -31,18 +31,30 @@ const AuthCallback = () => {
                         if (response.data.accessToken && response.data.refreshToken) {
                             tokenManager.setTokens(response.data.accessToken, response.data.refreshToken);
                         }
-                    } catch (error) {
+                    } catch (error: any) {
                         console.error('Failed to exchange auth code:', error);
+                        // If exchange fails, cookies might still be set from OAuth callback
+                        // Continue to check auth status
                     }
                 }
                 
                 // Now fetch user info and update auth state
+                // This will work with either cookies or Bearer tokens
                 try {
                     await checkAuth();
                     navigate('/dashboard');
                 } catch (error) {
                     console.error('Failed to get user info after OAuth:', error);
-                    navigate('/login');
+                    // Try one more time after a short delay (cookies might need time to propagate)
+                    setTimeout(async () => {
+                        try {
+                            await checkAuth();
+                            navigate('/dashboard');
+                        } catch (retryError) {
+                            console.error('Retry failed:', retryError);
+                            navigate('/login');
+                        }
+                    }, 1000);
                 }
             } else {
                 navigate('/login');
