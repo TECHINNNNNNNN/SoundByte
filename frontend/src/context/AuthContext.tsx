@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import api, { type User, type AuthResponse, type UserResponse } from '../services/api'
+import { tokenManager } from '../services/tokenManager'
 
 interface AuthContextType {
     user: User | null;
@@ -48,7 +49,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = async (email: string, password: string) => {
         try {
             const response = await api.post<AuthResponse>("/auth/login", { email, password })
-            const { user } = response.data
+            const { user, accessToken, refreshToken } = response.data as any
+
+            // Store tokens if provided (for cross-domain support)
+            if (accessToken && refreshToken) {
+                tokenManager.setTokens(accessToken, refreshToken)
+            }
 
             setUser(user)
             setIsAuthenticated(true)
@@ -65,7 +71,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const register = async (name: string, email: string, password: string) => {
         try {
             const response = await api.post<AuthResponse>('/auth/register', { name, email, password })
-            const { user } = response.data
+            const { user, accessToken, refreshToken } = response.data as any
+
+            // Store tokens if provided (for cross-domain support)
+            if (accessToken && refreshToken) {
+                tokenManager.setTokens(accessToken, refreshToken)
+            }
 
             setUser(user)
             setIsAuthenticated(true)
@@ -85,6 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } catch (error) {
             // silent fail
         } finally {
+            tokenManager.clearTokens() // Clear tokens on logout
             setIsAuthenticated(false)
             setUser(null)
         }

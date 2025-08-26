@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { tokenManager } from "../services/tokenManager";
+import api from "../services/api";
 
 const AuthCallback = () => {
     const [searchParams] = useSearchParams();
@@ -19,8 +21,22 @@ const AuthCallback = () => {
             }
 
             if (success === "true") {
-                // Tokens are already set as cookies by the backend
-                // Just need to fetch user info and update auth state
+                // Check if we have an auth code to exchange for tokens
+                const authCode = searchParams.get("code");
+                
+                if (authCode) {
+                    // Exchange auth code for tokens (for cross-domain support)
+                    try {
+                        const response = await api.post('/auth/exchange', { code: authCode });
+                        if (response.data.accessToken && response.data.refreshToken) {
+                            tokenManager.setTokens(response.data.accessToken, response.data.refreshToken);
+                        }
+                    } catch (error) {
+                        console.error('Failed to exchange auth code:', error);
+                    }
+                }
+                
+                // Now fetch user info and update auth state
                 try {
                     await checkAuth();
                     navigate('/dashboard');

@@ -1,4 +1,5 @@
 import axios from "axios"
+import { tokenManager } from "./tokenManager"
 
 // Define types manually to avoid axios type import issues
 interface AxiosInstance {
@@ -95,6 +96,18 @@ class ApiClient {
     }
 
     private setupInterceptors(): void {
+        // Request interceptor - Add Bearer token if available
+        this.instance.interceptors.request.use(
+            (config) => {
+                const token = tokenManager.getAccessToken();
+                if (token && !config.headers['Authorization']) {
+                    config.headers['Authorization'] = `Bearer ${token}`;
+                }
+                return config;
+            },
+            (error) => Promise.reject(error)
+        );
+
         // Response interceptor - Handle token refresh automatically
         this.instance.interceptors.response.use(
             (response: AxiosResponse) => response, // Pass through successful responses

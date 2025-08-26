@@ -71,8 +71,9 @@ router.post('/register', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,
-            }
-            // Note: accessToken removed from response since it's in cookie
+            },
+            accessToken: accessToken,
+            refreshToken: refreshToken
         })
 
     } catch (error) {
@@ -136,8 +137,9 @@ router.post('/login', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,
-            }
-            // Note: accessToken removed from response since it's in cookie
+            },
+            accessToken: accessToken,
+            refreshToken: refreshToken
         })
     } catch (error) {
         console.error("Error logging in:", error)
@@ -147,7 +149,14 @@ router.post('/login', async (req, res) => {
 
 router.post('/refresh', async (req, res) => {
     try {
-        const refreshToken = req.cookies.refreshToken
+        // Check for refresh token in cookie or Authorization header
+        let refreshToken = req.cookies.refreshToken
+        
+        // If no cookie, check Authorization header
+        if (!refreshToken) {
+            const authHeader = req.headers['authorization']
+            refreshToken = authHeader && authHeader.split(' ')[1]
+        }
 
         if (!refreshToken) {
             return res.status(401).json({ message: "Refresh token is required" })
@@ -206,8 +215,9 @@ router.post('/refresh', async (req, res) => {
         })
 
         res.status(200).json({
-            message: "Tokens refreshed successfully"
-            // Note: accessToken removed from response since it's in cookie
+            message: "Tokens refreshed successfully",
+            accessToken: accessToken,
+            refreshToken: newRefreshToken
         })
     } catch (error) {
         console.error("Error refreshing token:", error)
@@ -276,11 +286,16 @@ router.get('/google/callback',
                 maxAge: 15 * 60 * 1000 // 15 minutes
             })
 
-            // Redirect without exposing tokens in URL
+            // Redirect with temporary auth code
             const clientUrl = process.env.NODE_ENV === 'production' 
                 ? process.env.CLIENT_URL 
                 : (process.env.CLIENT_URL || 'http://localhost:5173');
-            res.redirect(`${clientUrl}/auth/callback?success=true`)
+            // Create temporary auth code (valid for 1 minute)
+            const authCode = Buffer.from(`${req.user.id}:${Date.now()}`).toString('base64');
+            // Store tokens temporarily with auth code as key
+            global.tempAuthTokens = global.tempAuthTokens || {};
+            global.tempAuthTokens[authCode] = { accessToken, refreshToken, expires: Date.now() + 60000 };
+            res.redirect(`${clientUrl}/auth/callback?success=true&code=${authCode}`)
 
         } catch (error) {
             console.error("Error in Google login callback:", error)
@@ -320,11 +335,16 @@ router.get('/github/callback',
                 maxAge: 15 * 60 * 1000 // 15 minutes
             })
 
-            // Redirect without exposing tokens in URL
+            // Redirect with temporary auth code
             const clientUrl = process.env.NODE_ENV === 'production' 
                 ? process.env.CLIENT_URL 
                 : (process.env.CLIENT_URL || 'http://localhost:5173');
-            res.redirect(`${clientUrl}/auth/callback?success=true`)
+            // Create temporary auth code (valid for 1 minute)
+            const authCode = Buffer.from(`${req.user.id}:${Date.now()}`).toString('base64');
+            // Store tokens temporarily with auth code as key
+            global.tempAuthTokens = global.tempAuthTokens || {};
+            global.tempAuthTokens[authCode] = { accessToken, refreshToken, expires: Date.now() + 60000 };
+            res.redirect(`${clientUrl}/auth/callback?success=true&code=${authCode}`)
 
         } catch (error) {
             console.error("Error in Github login callback:", error)
@@ -332,5 +352,46 @@ router.get('/github/callback',
         }
     }
 )
+
+// Exchange auth code for tokens (for OAuth flow)
+router.post('/exchange', async (req, res) => {
+    try {
+        const { code } = req.body;
+        
+        if (!code) {
+            return res.status(400).json({ message: "Auth code is required" });
+        }
+        
+        // Clean up expired codes
+        if (global.tempAuthTokens) {
+            const now = Date.now();
+            Object.keys(global.tempAuthTokens).forEach(key => {
+                if (global.tempAuthTokens[key].expires < now) {
+                    delete global.tempAuthTokens[key];
+                }
+            });
+        }
+        
+        // Get tokens from temporary storage
+        const tokens = global.tempAuthTokens?.[code];
+        
+        if (!tokens) {
+            return res.status(401).json({ message: "Invalid or expired auth code" });
+        }
+        
+        // Remove from temporary storage
+        delete global.tempAuthTokens[code];
+        
+        // Return tokens
+        res.json({
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken
+        });
+        
+    } catch (error) {
+        console.error("Error exchanging auth code:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
 
 export default router
