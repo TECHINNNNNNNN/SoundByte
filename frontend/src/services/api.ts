@@ -136,14 +136,17 @@ class ApiClient {
                     this.isRefreshing = true;
 
                     try {
-                        // Call refresh endpoint - cookies are sent automatically with withCredentials: true
-                        await this.instance.post<RefreshResponse>("/auth/refresh")
+                        // Use header-based refresh via tokenManager to avoid Safari ITP cookie issues
+                        const refreshed = await tokenManager.refreshAccessToken();
+                        if (!refreshed) {
+                            throw new Error('Refresh via header failed');
+                        }
 
                         // Process queued requests
                         this.refreshSubscribers.forEach((callback: RefreshSubscriber) => callback());
                         this.refreshSubscribers = [];
 
-                        // Retry original request - cookies will be sent automatically
+                        // Retry original request - Authorization header will be added by request interceptor
                         return this.instance(originalRequest)
 
                     } catch (refreshError) {
