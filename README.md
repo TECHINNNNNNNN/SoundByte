@@ -474,6 +474,10 @@ AWS_SECRET_ACCESS_KEY="..."
 AWS_REGION="us-east-1"
 S3_BUCKET_NAME="soundbyte-audio"
 
+# Email (Resend)
+RESEND_API_KEY="re_..."
+RESEND_FROM="SoundByte <noreply@yourdomain.com>"
+
 # Stripe
 STRIPE_SECRET_KEY="sk_test_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
