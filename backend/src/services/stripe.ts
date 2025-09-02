@@ -3,17 +3,6 @@ import { PrismaClient } from '../../generated/prisma/index.js'
 
 const prisma = new PrismaClient();
 
-// Extended type for subscription with items
-interface ExtendedSubscription extends Stripe.Subscription {
-  current_period_end?: number;
-  items?: {
-    data: Array<{
-      current_period_end?: number;
-      price: Stripe.Price;
-    }>;
-  };
-}
-
 // Initialize Stripe - latest API version as of Aug 2025
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-07-30.basil',
@@ -109,17 +98,16 @@ export async function createPortalSession(userId: string, returnUrl: string) {
 /**
  * Handle subscription updates from webhooks
  */
-export async function handleSubscriptionUpdate(subscription: ExtendedSubscription) {
+export async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   const userId = subscription.metadata.userId;
   if (!userId) {
     console.log('No userId in subscription metadata:', subscription.id);
     return;
   }
 
-  // Get period end from subscription (check both possible locations)
-  const periodEnd = subscription.current_period_end || 
-                    subscription.items?.data?.[0]?.current_period_end;
-  
+  // Get period end from subscription (typed as any to accommodate SDK typing variance)
+  const periodEnd = (subscription as any).current_period_end as number | undefined;
+
   if (!periodEnd) {
     console.error('No current_period_end found in subscription:', subscription.id);
     return;
@@ -166,16 +154,33 @@ export async function hasActiveSubscription(userId: string): Promise<boolean> {
     where: { userId },
     select: { status: true, currentPeriodEnd: true }
   });
-  
-  console.log('Database subscription check:', { 
-    userId, 
+
+  console.log('Database subscription check:', {
+    userId,
     subscription,
     isActive: subscription?.status === 'active',
     isCurrent: subscription?.currentPeriodEnd ? subscription.currentPeriodEnd > new Date() : false
   });
 
-  return subscription?.status === 'active' &&
-    subscription.currentPeriodEnd > new Date();
+  const isActiveAndCurrent = !!(subscription?.status === 'active' &&
+    subscription.currentPeriodEnd > new Date());
+
+  // Ensure a usage row exists for the current period when subscription is active
+  if (isActiveAndCurrent) {
+    const period = new Date().toISOString().slice(0, 7); // YYYY-MM
+    await prisma.usage.upsert({
+      where: { userId_period: { userId, period } },
+      create: {
+        userId,
+        period,
+        tokens: 0,
+        tokenLimit: TIER_LIMITS.pro,
+      },
+      update: {}
+    });
+  }
+
+  return isActiveAndCurrent;
 }
 
 /**
@@ -190,7 +195,8 @@ export async function trackUsage(userId: string, tokens: number): Promise<boolea
       userId,
       period,
       tokens,
-      tokenLimit: 0, // Free tier by default
+      // Default to pro limit if user has active subscription; otherwise 0 (free tier)
+      tokenLimit: TIER_LIMITS.pro,
     },
     update: {
       tokens: { increment: tokens }

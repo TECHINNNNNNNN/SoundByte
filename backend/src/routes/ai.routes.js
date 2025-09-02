@@ -14,7 +14,8 @@ router.post('/message', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Missing conversationId or message' })
     }
 
-    const tokenCheck = await tokenUsage.checkTokensAvailable(userId, message.length)
+    const estimated = tokenUsage.estimateTokens(message)
+    const tokenCheck = await tokenUsage.checkTokensAvailable(userId, estimated)
     if (!tokenCheck.allowed) {
       return res.status(403).json({
         error: tokenCheck.message,
