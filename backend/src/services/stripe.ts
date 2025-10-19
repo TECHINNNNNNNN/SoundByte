@@ -20,6 +20,15 @@ export const PRICE_IDS = {
 
 /**
  * Create or retrieve Stripe customer
+ * 
+ * This function ensures that the Stripe customer ID stored in our database
+ * actually exists in Stripe. If it doesn't exist (e.g., from test mode data),
+ * it will clear the invalid ID and create a new customer.
+ * 
+ * @param userId - The user's database ID
+ * @param email - The user's email address
+ * @param name - Optional user name
+ * @returns The valid Stripe customer ID
  */
 export async function getOrCreateCustomer(userId: string, email: string, name?: string) {
   const user = await prisma.user.findUnique({
@@ -27,11 +36,33 @@ export async function getOrCreateCustomer(userId: string, email: string, name?: 
     select: { stripeCustomerId: true }
   });
 
+  // If we have a customer ID stored, verify it exists in Stripe
   if (user?.stripeCustomerId) {
-    return user.stripeCustomerId;
+    try {
+      // Attempt to retrieve the customer from Stripe to verify it exists
+      await stripe.customers.retrieve(user.stripeCustomerId);
+      console.log(`✓ Valid Stripe customer found: ${user.stripeCustomerId}`);
+      return user.stripeCustomerId;
+    } catch (error: any) {
+      // Customer doesn't exist in Stripe (common when switching from test to live mode)
+      if (error.code === 'resource_missing') {
+        console.warn(`⚠️  Invalid customer ID ${user.stripeCustomerId} for user ${userId}. Clearing and creating new customer.`);
+        
+        // Clear the invalid customer ID from database
+        await prisma.user.update({
+          where: { id: userId },
+          data: { stripeCustomerId: null }
+        });
+      } else {
+        // Some other Stripe error - log and rethrow
+        console.error('Error retrieving Stripe customer:', error);
+        throw error;
+      }
+    }
   }
 
   // Create new Stripe customer
+  console.log(`Creating new Stripe customer for user ${userId}`);
   const customer = await stripe.customers.create({
     email,
     name: name || undefined,
@@ -44,6 +75,7 @@ export async function getOrCreateCustomer(userId: string, email: string, name?: 
     data: { stripeCustomerId: customer.id }
   });
 
+  console.log(`✓ New Stripe customer created: ${customer.id}`);
   return customer.id;
 }
 
@@ -78,6 +110,10 @@ export async function createCheckoutSession(
 
 /**
  * Create customer portal session
+ * 
+ * This allows users to manage their subscription, payment methods, and billing history.
+ * If the customer ID is invalid, it will throw an error since the portal requires
+ * an existing customer with a subscription.
  */
 export async function createPortalSession(userId: string, returnUrl: string) {
   const user = await prisma.user.findUnique({
@@ -86,13 +122,28 @@ export async function createPortalSession(userId: string, returnUrl: string) {
   });
 
   if (!user?.stripeCustomerId) {
-    throw new Error('No Stripe customer found');
+    throw new Error('No Stripe customer found. Please subscribe first.');
   }
 
-  return await stripe.billingPortal.sessions.create({
-    customer: user.stripeCustomerId,
-    return_url: returnUrl,
-  });
+  try {
+    // Verify customer exists in Stripe before creating portal session
+    await stripe.customers.retrieve(user.stripeCustomerId);
+    
+    return await stripe.billingPortal.sessions.create({
+      customer: user.stripeCustomerId,
+      return_url: returnUrl,
+    });
+  } catch (error: any) {
+    if (error.code === 'resource_missing') {
+      // Clear invalid customer ID
+      await prisma.user.update({
+        where: { id: userId },
+        data: { stripeCustomerId: null }
+      });
+      throw new Error('Invalid customer data. Please contact support or try subscribing again.');
+    }
+    throw error;
+  }
 }
 
 /**

@@ -37,7 +37,13 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     res.json({ url: session.url });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    res.status(500).json({ error: 'Failed to create checkout session' });
+    
+    // Provide more helpful error messages
+    const errorMessage = error.message || 'Failed to create checkout session';
+    res.status(500).json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -63,7 +69,13 @@ router.post('/create-portal-session', authenticateToken, async (req, res) => {
     res.json({ url: session.url });
   } catch (error) {
     console.error('Error creating portal session:', error);
-    res.status(500).json({ error: 'Failed to create portal session' });
+    
+    // Provide more helpful error messages
+    const errorMessage = error.message || 'Failed to create portal session';
+    res.status(500).json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
