@@ -16,7 +16,11 @@ const Profile = () => {
     hasSubscription,
     remainingTokens,
     tokenLimit,
+    tokensUsed,
+    tokensAllocated,
     percentageUsed,
+    periodStart,
+    periodEnd,
     refetch
   } = useSubscription()
 
@@ -128,28 +132,77 @@ const Profile = () => {
                     </span>
                   </div>
 
-                  {/* Token Usage */}
+                  {/* Billing Period */}
+                  {periodStart && periodEnd && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">Billing Period:</span>
+                      <span className="text-gray-800 font-medium">
+                        {new Date(periodStart).toLocaleDateString()} - {new Date(periodEnd).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Token Usage Breakdown */}
                   <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-700">Token Usage:</span>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-gray-700 font-semibold">Token Usage:</span>
                       <span className="text-sm text-gray-600">
                         {tokenLimit - remainingTokens} / {tokenLimit} tokens
                       </span>
                     </div>
 
+                    {/* Detailed breakdown */}
+                    <div className="space-y-1 mb-3 text-sm">
+                      <div className="flex justify-between text-gray-600">
+                        <span>• Consumed (chat + digests):</span>
+                        <span className="font-medium">{tokensUsed.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-600">
+                        <span>• Reserved (for digests):</span>
+                        <span className="font-medium">{tokensAllocated.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-green-600">
+                        <span>• Available:</span>
+                        <span className="font-semibold">{remainingTokens.toLocaleString()}</span>
+                      </div>
+                    </div>
+
                     {/* Progress Bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all ${percentageUsed > 80 ? 'bg-red-500' :
-                          percentageUsed > 50 ? 'bg-yellow-500' : 'bg-green-500'
-                          }`}
-                        style={{ width: `${Math.min(percentageUsed, 100)}%` }}
-                      />
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                      <div className="h-full flex">
+                        {/* Consumed tokens (blue) */}
+                        <div
+                          className="bg-blue-500"
+                          style={{ width: `${Math.min((tokensUsed / tokenLimit) * 100, 100)}%` }}
+                          title={`Consumed: ${tokensUsed}`}
+                        />
+                        {/* Allocated tokens (yellow) */}
+                        <div
+                          className="bg-yellow-500"
+                          style={{ width: `${Math.min((tokensAllocated / tokenLimit) * 100, 100)}%` }}
+                          title={`Reserved: ${tokensAllocated}`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 mt-2 text-xs">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                        <span className="text-gray-600">Consumed</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                        <span className="text-gray-600">Reserved</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-gray-200 rounded"></div>
+                        <span className="text-gray-600">Available</span>
+                      </div>
                     </div>
 
                     {percentageUsed > 80 && (
-                      <p className="text-sm text-red-600 mt-1">
-                        Warning: You've used {percentageUsed.toFixed(0)}% of your monthly tokens
+                      <p className="text-sm text-red-600 mt-2 font-medium">
+                        ⚠️ Warning: You've used {percentageUsed.toFixed(0)}% of your tokens
                       </p>
                     )}
                   </div>

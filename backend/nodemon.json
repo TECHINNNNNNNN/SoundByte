@@ -2,7 +2,9 @@
   "watch": ["src"],
   "ext": "js,json",
   "ignore": ["src/**/*.spec.js", "node_modules"],
-  "exec": "node -r dotenv/config",
+  "execMap": {
+    "js": "node -r dotenv/config"
+  },
   "env": {
     "NODE_ENV": "development"
   }

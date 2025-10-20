@@ -1,9 +1,8 @@
 import express from 'express'
-import { PrismaClient } from "../../generated/prisma/index.js"
+import { prisma } from "../lib/db.js"
 import { authenticateToken } from "../middleware/auth.js"
 
 const router = express.Router()
-const prisma = new PrismaClient()
 
 // add a message to a conversation
 router.post('/:conversationId/messages', authenticateToken, async (req, res) => {

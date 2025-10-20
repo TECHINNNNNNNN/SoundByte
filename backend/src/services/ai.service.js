@@ -3,7 +3,7 @@
 import { generateText, tool, stepCountIs } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
-import { PrismaClient } from '../../generated/prisma/index.js'
+import { prisma } from '../lib/db.js';
 import * as perplexityService from './perplexity.service.js'
 import * as multiSpeakerTTS from './multiSpeakerTTS.service.js'
 import * as s3Service from './s3.service.js'
@@ -13,8 +13,6 @@ import {
   ENHANCED_SYSTEM_PROMPT,
   CONVERSATION_STATE_PROMPT
 } from './prompts/enhanced-system-prompt.js'
-
-const prisma = new PrismaClient()
 
 // news search tool
 const searchNewsTool = tool({

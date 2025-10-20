@@ -1,9 +1,9 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
-import { PrismaClient } from "../../generated/prisma/index.js"
+import { prisma } from '../lib/db.js';
+import * as stripeService from '../services/stripe.js';
 
 const router = express.Router();
-const prisma = new PrismaClient()
 
 // Get all user digests
 router.get('/', authenticateToken, async (req, res) => {
@@ -86,6 +86,56 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid frequency' });
     }
 
+    // Check subscription status
+    const hasSubscription = await stripeService.hasActiveSubscription(req.user.id);
+
+    // FREE TIER RESTRICTIONS
+    if (!hasSubscription) {
+      // Check if user already has an active digest
+      const existingDigests = await prisma.digest.count({
+        where: { userId: req.user.id, isActive: true }
+      });
+
+      if (existingDigests >= 1) {
+        return res.status(403).json({ 
+          error: 'Free tier allows only 1 active digest. Upgrade to Pro for unlimited digests!',
+          upgradeRequired: true
+        });
+      }
+
+      // Restrict to daily/weekly only (no monthly)
+      if (frequency === 'monthly') {
+        return res.status(403).json({ 
+          error: 'Monthly digests require Pro subscription. Free tier supports daily or weekly only.',
+          upgradeRequired: true
+        });
+      }
+
+      // Restrict to max 5-minute audio
+      if (audioLength > 5) {
+        return res.status(403).json({ 
+          error: '10-minute digests require Pro subscription. Free tier maximum is 5 minutes.',
+          upgradeRequired: true
+        });
+      }
+    }
+
+    // Calculate monthly token allocation
+    const monthlyAllocation = stripeService.calculateDigestAllocation(audioLength, frequency);
+
+    // Check if user can afford this allocation
+    const canAllocate = await stripeService.allocateDigestTokens(req.user.id, audioLength, frequency);
+    
+    if (!canAllocate) {
+      const remaining = await stripeService.getRemainingTokens(req.user.id);
+      return res.status(403).json({ 
+        error: `Not enough tokens. This digest needs ${monthlyAllocation} tokens/month. You have ${remaining} available.`,
+        tokensNeeded: monthlyAllocation,
+        tokensAvailable: remaining,
+        upgradeRequired: !hasSubscription
+      });
+    }
+
     // Validate preferred hour
     const hour = preferredHour || 8;
     if (hour < 0 || hour > 23) {
@@ -98,10 +148,11 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Email required. Please provide an email or enable default email.' });
     }
 
-    // Calculate next generation time with timezone
+    // Calculate next generation time
     const tz = timezone || 'UTC';
     const nextGenerationAt = calculateNextGeneration(frequency, tz, hour);
 
+    // Create digest
     const digest = await prisma.digest.create({
       data: {
         userId: req.user.id,
@@ -117,7 +168,11 @@ router.post('/', authenticateToken, async (req, res) => {
       }
     });
 
-    res.status(201).json(digest);
+    res.status(201).json({
+      ...digest,
+      tokensAllocated: monthlyAllocation,
+      message: `Digest created! ${monthlyAllocation} tokens reserved for monthly generations.`
+    });
   } catch (error) {
     console.error('Create digest error:', error);
     res.status(500).json({ error: 'Failed to create digest' });
@@ -172,6 +227,19 @@ router.post('/:id/generate', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Digest not found' });
     }
 
+    // Check if user has enough tokens for this generation
+    const estimatedCost = stripeService.DIGEST_TOKEN_COST[digest.audioLength] || 8000;
+    const remainingTokens = await stripeService.getRemainingTokens(req.user.id);
+    
+    if (remainingTokens < estimatedCost) {
+      return res.status(403).json({ 
+        error: `Not enough tokens. Need ${estimatedCost}, have ${remainingTokens}. Upgrade to Pro for more tokens!`,
+        tokensNeeded: estimatedCost,
+        tokensAvailable: remainingTokens,
+        upgradeRequired: !(await stripeService.hasActiveSubscription(req.user.id))
+      });
+    }
+
     // Import dynamically to avoid circular dependencies
     const { generateDigest } = await import('../services/digest.service.js');
     const delivery = await generateDigest(digest.id);
@@ -179,7 +247,8 @@ router.post('/:id/generate', authenticateToken, async (req, res) => {
     res.json({
       message: 'Digest generated successfully',
       audioUrl: delivery.audioUrl,
-      deliveryId: delivery.id
+      deliveryId: delivery.id,
+      tokensUsed: estimatedCost
     });
   } catch (error) {
     console.error('Generate digest error:', error);
@@ -250,6 +319,15 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
     if (!digest) {
       return res.status(404).json({ error: 'Digest not found' });
+    }
+
+    // Deallocate tokens if digest is active (only active digests have allocated tokens)
+    if (digest.isActive) {
+      await stripeService.deallocateDigestTokens(
+        req.user.id,
+        digest.audioLength,
+        digest.frequency
+      );
     }
 
     await prisma.digest.delete({

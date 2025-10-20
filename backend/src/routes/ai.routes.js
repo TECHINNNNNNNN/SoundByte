@@ -1,7 +1,7 @@
 import express from 'express'
 import { authenticateToken } from '../middleware/auth.js'
 import * as aiService from '../services/ai.service.js'
-import * as tokenUsage from '../services/tokenUsage.ts'
+import * as tokenUsage from '../services/tokenUsage.js'
 
 const router = express.Router()
 

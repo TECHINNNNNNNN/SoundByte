@@ -1,11 +1,10 @@
-import { PrismaClient } from '../../generated/prisma/index.js'
+import { prisma } from '../lib/db.js';
 import { researchNews } from './perplexity.service.js'
 import { formatAsDialogue } from './format.service.js'
 import { generateMultiSpeakerAudio } from './multiSpeakerTTS.service.js'
 import { uploadAudio } from './s3.service.js'
 import { sendDigestEmail } from './email.service.js'
-
-const prisma = new PrismaClient()
+import * as stripeService from './stripe.js';
 
 // basically: research -> format -> audio -> store
 export async function generateDigest(digestId) {
@@ -77,6 +76,12 @@ export async function generateDigest(digestId) {
       nextGenerationAt: getNextGenerationTime(digest.frequency, digest.timezone, digest.preferredHour)
     }
   })
+  
+  // Track token usage for this generation
+  const tokenCost = stripeService.DIGEST_TOKEN_COST[digest.audioLength] || 8000;
+  await stripeService.trackUsage(digest.userId, tokenCost);
+  
+  console.log(`📊 Digest generated - ${tokenCost} tokens tracked for user ${digest.userId}`);
   
   return delivery
 }

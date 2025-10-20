@@ -8,7 +8,7 @@ import {
 import mime from 'mime';
 import { writeFile } from 'fs';
 
-function saveBinaryFile(fileName: string, content: Buffer) {
+function saveBinaryFile(fileName, content) {
     writeFile(fileName, content, 'utf8', (err) => {
         if (err) {
             console.error(`Error writing file ${fileName}:`, err);
@@ -101,12 +101,12 @@ Speaker 1: I will, Chloe! Thanks for dreaming with me!`,
 main();
 
 interface WavConversionOptions {
-    numChannels: number,
-    sampleRate: number,
-    bitsPerSample: number
+    numChannels,
+    sampleRate,
+    bitsPerSample
 }
 
-function convertToWav(rawData: string, mimeType: string) {
+function convertToWav(rawData, mimeType) {
     const options = parseMimeType(mimeType)
     const wavHeader = createWavHeader(rawData.length, options);
     const buffer = Buffer.from(rawData, 'base64');
@@ -114,7 +114,7 @@ function convertToWav(rawData: string, mimeType: string) {
     return Buffer.concat([wavHeader, buffer]);
 }
 
-function parseMimeType(mimeType: string) {
+function parseMimeType(mimeType) {
     const [fileType, ...params] = mimeType.split(';').map(s => s.trim());
     const [_, format] = fileType.split('/');
 
@@ -139,7 +139,7 @@ function parseMimeType(mimeType: string) {
     return options as WavConversionOptions;
 }
 
-function createWavHeader(dataLength: number, options: WavConversionOptions) {
+function createWavHeader(dataLength, options) {
     const {
         numChannels,
         sampleRate,

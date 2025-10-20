@@ -56,14 +56,14 @@ export function startScheduler() {
   cleanupJob.start()
   console.log('🧹 Cleanup job started - checking every 15 minutes')
   
-  // Run once on startup
+  // Run once on startup (async, doesn't block)
   processPendingDigests().then(results => {
     if (results.length > 0) {
       console.log(`🚀 Startup: Processed ${results.length} pending digests`)
     }
   }).catch(console.error)
   
-  // Clean expired auth codes on startup
+  // Clean expired auth codes on startup (async, doesn't block)
   prisma.authCode.deleteMany({
     where: {
       expires: {

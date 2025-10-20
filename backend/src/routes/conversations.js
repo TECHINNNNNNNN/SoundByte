@@ -1,9 +1,8 @@
 import express from 'express'
-import { PrismaClient } from "../../generated/prisma/index.js"
+import { prisma } from "../lib/db.js"
 import { authenticateToken } from "../middleware/auth.js"
 
 const router = express.Router()
-const prisma = new PrismaClient()
 
 
 // Get all conversations for the authenticated user

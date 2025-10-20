@@ -4,9 +4,7 @@ import { openai as vercelOpenAI } from '@ai-sdk/openai'
 import * as perplexityService from './perplexity.service.js'
 import * as ttsService from './tts.service.js'
 import * as s3Service from './s3.service.js'
-import { PrismaClient } from '../../generated/prisma/index.js'
-
-const prisma = new PrismaClient()
+import { prisma } from '../lib/db.js';
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 })

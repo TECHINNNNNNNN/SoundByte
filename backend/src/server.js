@@ -16,6 +16,16 @@ import webhookRoutes from "./routes/webhooks.js"
 
 dotenv.config()
 
+// Catch unhandled errors
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('🚨 Uncaught Exception:', error);
+  // Do not exit; keep server alive during development for visibility
+});
+
 const app = express()
 const PORT = process.env.PORT || 3000
 
@@ -23,66 +33,76 @@ if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);
 }
 
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-
-    max: process.env.NODE_ENV === 'production' ? Number(process.env.RATE_LIMIT_MAX || 2000) : 1000,
-    message: "Too many requests, please try again later.",
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: (req) => req.method === 'OPTIONS' || req.path === '/health',
+// Very early health check (before any middleware)
+app.get('/health', (_req, res) => {
+    console.log('[HEALTH] /health hit')
+    res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-app.use(limiter)
+// Simple request logger in development to verify requests reach Express
+if (process.env.NODE_ENV !== 'production') {
+    app.use((req, _res, next) => {
+        if (req.path !== '/health') {
+            console.log(`[REQ] ${req.method} ${req.originalUrl}`)
+        }
+        next()
+    })
+}
+
+// Rate limit only in production (avoid any chance of dev misbehavior)
+if (process.env.NODE_ENV === 'production') {
+    const limiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: Number(process.env.RATE_LIMIT_MAX || 2000),
+        message: "Too many requests, please try again later.",
+        standardHeaders: true,
+        legacyHeaders: false,
+        skip: (req) => req.method === 'OPTIONS' || req.path === '/health',
+    })
+    app.use(limiter)
+}
+
+// CORS: relax in development to eliminate preflight issues
+if (process.env.NODE_ENV !== 'production') {
+    app.use(cors({ origin: true, credentials: true }))
+} else {
+    app.use(cors({
+        origin: function (origin, callback) {
+            if (!origin) return callback(null, true)
+            const allowedOrigins = [process.env.CLIENT_URL || process.env.FRONTEND_URL].filter(Boolean)
+            const isVercelPreview = origin && origin.includes('.vercel.app')
+            if (allowedOrigins.includes(origin) || isVercelPreview) return callback(null, true)
+            console.warn(`CORS blocked origin: ${origin}`)
+            return callback(null, false)
+        },
+        credentials: true,
+    }))
+}
 
 // webhooks need raw body
 app.use("/api/webhooks", webhookRoutes)
 
-// CORS configuration that supports multiple origins
-const corsOptions = {
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or Postman)
-        if (!origin) return callback(null, true);
-
-        // In production, allow main URL and Vercel preview deployments
-        // In development, allow localhost origins
-        const allowedOrigins = process.env.NODE_ENV === 'production'
-            ? [process.env.CLIENT_URL || process.env.FRONTEND_URL].filter(Boolean)
-            : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'];
-
-        // Also allow Vercel preview deployments
-        const isVercelPreview = origin && origin.includes('.vercel.app');
-
-        if (allowedOrigins.includes(origin) || isVercelPreview) {
-            callback(null, true);
-        } else {
-            console.warn(`CORS blocked origin: ${origin}`);
-            callback(null, false);
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
-    exposedHeaders: ['Content-Range', 'X-Content-Range']
-};
-
-app.use(cors(corsOptions))
+// Note: additional dynamic CORS rules removed for development simplicity
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use(cookieParser())
 
-
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    }
-}))
+// Session middleware
+if (process.env.SESSION_SECRET) {
+    app.use(session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        }
+    }))
+} else {
+    console.warn('⚠️  SESSION_SECRET not set - session middleware disabled')
+}
 
 app.use(passport.initialize())
 
@@ -93,10 +113,6 @@ app.use("/api/ai", aiRoutes)
 app.use("/api/digests", digestRoutes)
 app.use("/api/payments", paymentRoutes)
 
-
-app.get("/health", (_req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() })
-})
 
 app.use((err, _req, res, _next) => {
     console.error("Error:", err)
@@ -109,12 +125,15 @@ app.use((_req, res) => {
 
 import { startScheduler } from './services/scheduler.service.js'
 
-// Start the server
-app.listen(PORT, () => {
+// Start the server (and keep a reference to prevent accidental GC)
+const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 SoundByte API running on port ${PORT}`);
     console.log(`📱 Frontend URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
     console.log(`🏥 Health check: http://localhost:${PORT}/health`);
-
+    
     // Start the digest scheduler
     startScheduler()
 })
+
+// Keep process alive
+process.stdin.resume()

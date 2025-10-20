@@ -1,10 +1,9 @@
 import express from 'express';
-import { PrismaClient } from "../../generated/prisma/index.js"
+import { prisma } from '../lib/db.js';
 import { authenticateToken } from '../middleware/auth.js';
-import * as stripeService from '../services/stripe.ts';
+import * as stripeService from '../services/stripe.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Create checkout session
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
@@ -105,27 +104,38 @@ router.get('/subscription-status', authenticateToken, async (req, res) => {
 router.get('/usage', authenticateToken, async (req, res) => {
   try {
     const { id: userId } = req.user;
-    const period = new Date().toISOString().slice(0, 7);
+    
+    // Get current billing period
+    const { periodStart, periodEnd } = await stripeService.getCurrentBillingPeriod(userId);
 
     const usage = await prisma.usage.findUnique({
-      where: { userId_period: { userId, period } }
+      where: { userId_periodStart: { userId, periodStart } }
     });
 
     if (!usage) {
+      // No usage yet - return defaults
+      const hasSubscription = await stripeService.hasActiveSubscription(userId);
+      const limit = hasSubscription ? stripeService.TIER_LIMITS.pro : stripeService.TIER_LIMITS.free;
+      
       return res.json({
-        period,
+        periodStart,
+        periodEnd,
         tokensUsed: 0,
-        tokenLimit: 0,
+        tokensAllocated: 0,
+        tokenLimit: limit,
         percentageUsed: 0
       });
     }
 
     const totalLimit = usage.tokenLimit + usage.extraTokens;
-    const percentageUsed = totalLimit > 0 ? (usage.tokens / totalLimit) * 100 : 0;
+    const totalUsed = usage.tokens + usage.allocatedTokens;
+    const percentageUsed = totalLimit > 0 ? (totalUsed / totalLimit) * 100 : 0;
 
     res.json({
-      period,
+      periodStart: usage.periodStart,
+      periodEnd: usage.periodEnd,
       tokensUsed: usage.tokens,
+      tokensAllocated: usage.allocatedTokens,
       tokenLimit: totalLimit,
       percentageUsed: Math.round(percentageUsed)
     });

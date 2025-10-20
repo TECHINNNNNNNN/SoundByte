@@ -7,8 +7,10 @@ interface SubscriptionStatus {
 }
 
 interface UsageStats {
-  period: string;
+  periodStart: string;
+  periodEnd: string;
   tokensUsed: number;
+  tokensAllocated: number;
   tokenLimit: number;
   percentageUsed: number;
 }

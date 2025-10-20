@@ -1,9 +1,8 @@
 import express from 'express';
-import { PrismaClient } from '../../generated/prisma/index.js'
-import { constructWebhookEvent, handleSubscriptionUpdate } from '../services/stripe.ts';
+import { prisma } from '../lib/db.js';
+import { constructWebhookEvent, handleSubscriptionUpdate, getCurrentBillingPeriod, TIER_LIMITS } from '../services/stripe.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Stripe webhook endpoint - raw body required for signature verification
 router.post('/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -97,18 +96,22 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
           });
 
           if (subscription) {
-            const period = new Date().toISOString().slice(0, 7);
+            // Reset usage for new billing period
+            const { periodStart, periodEnd } = await getCurrentBillingPeriod(subscription.userId);
             await prisma.usage.upsert({
-              where: { userId_period: { userId: subscription.userId, period } },
+              where: { userId_periodStart: { userId: subscription.userId, periodStart } },
               create: {
                 userId: subscription.userId,
-                period,
+                periodStart,
+                periodEnd,
                 tokens: 0,
-                tokenLimit: 500000
+                tokenLimit: TIER_LIMITS.pro,
+                allocatedTokens: 0,
+                extraTokens: 0
               },
               update: {
-                tokens: 0,
-                tokenLimit: 500000
+                tokens: 0, // Reset consumed tokens for new period
+                tokenLimit: TIER_LIMITS.pro
               }
             });
           }

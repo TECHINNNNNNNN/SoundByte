@@ -191,19 +191,21 @@ model Subscription {
 }
 
 model Usage {
-  id          String   @id @default(cuid())
-  userId      String
-  period      String // YYYY-MM format
-  tokens      Int      @default(0)
-  tokenLimit  Int      @default(500000) // 500K tokens per month
-  extraTokens Int      @default(0) // Additional purchased tokens
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String
+  periodStart     DateTime // Billing period start date
+  periodEnd       DateTime // Billing period end date (30 days from start)
+  tokens          Int      @default(0) // Tokens consumed this period
+  tokenLimit      Int      @default(10000) // Monthly token limit (10K free, 500K pro)
+  allocatedTokens Int      @default(0) // Tokens reserved for recurring digests
+  extraTokens     Int      @default(0) // Additional purchased tokens
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, period])
-  @@index([period])
+  @@unique([userId, periodStart])
+  @@index([periodEnd])
   @@map("usage")
 }
 
