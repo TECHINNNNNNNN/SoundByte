@@ -92,7 +92,7 @@ router.get('/subscription-status', authenticateToken, async (req, res) => {
     res.json({
       hasSubscription,
       remainingTokens,
-      tokenLimit: hasSubscription ? stripeService.TIER_LIMITS.pro : 0
+      tokenLimit: hasSubscription ? stripeService.TIER_LIMITS.pro : stripeService.TIER_LIMITS.free
     });
   } catch (error) {
     console.error('Error getting subscription status:', error);

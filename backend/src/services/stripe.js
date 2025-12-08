@@ -317,9 +317,45 @@ export async function handleSubscriptionUpdate(subscription) {
         allocatedTokens: 0,
         extraTokens: 0
       },
-      update: {} // Don't reset existing usage
+      update: {
+        // Upgrade to Pro tier limits (keeps existing token consumption)
+        tokenLimit: TIER_LIMITS.pro
+      }
     });
   }
+
+  // Handle subscription cancellation - reset to free tier
+  if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
+    await resetToFreeTier(userId);
+  }
+}
+
+/**
+ * Reset user to free tier when subscription ends
+ * Creates a fresh 30-day billing period with free tier limits
+ */
+export async function resetToFreeTier(userId) {
+  console.log(`Resetting user ${userId} to free tier`);
+
+  // Create new 30-day period starting now
+  const periodStart = new Date();
+  const periodEnd = new Date(periodStart);
+  periodEnd.setDate(periodEnd.getDate() + 30);
+
+  // Create fresh usage record for free tier
+  await prisma.usage.create({
+    data: {
+      userId,
+      periodStart,
+      periodEnd,
+      tokens: 0,
+      tokenLimit: TIER_LIMITS.free,
+      allocatedTokens: 0,
+      extraTokens: 0
+    }
+  });
+
+  console.log(`Created fresh free tier period for user ${userId}: ${periodStart.toISOString()} - ${periodEnd.toISOString()}`);
 }
 
 /**
