@@ -333,6 +333,7 @@ export async function handleSubscriptionUpdate(subscription) {
 /**
  * Reset user to free tier when subscription ends
  * Creates a fresh 30-day billing period with free tier limits
+ * Also deactivates digests that exceed free tier limits
  */
 export async function resetToFreeTier(userId) {
   console.log(`Resetting user ${userId} to free tier`);
@@ -342,9 +343,10 @@ export async function resetToFreeTier(userId) {
   const periodEnd = new Date(periodStart);
   periodEnd.setDate(periodEnd.getDate() + 30);
 
-  // Create fresh usage record for free tier
-  await prisma.usage.create({
-    data: {
+  // Use upsert to handle case where usage record already exists for this period
+  await prisma.usage.upsert({
+    where: { userId_periodStart: { userId, periodStart } },
+    create: {
       userId,
       periodStart,
       periodEnd,
@@ -352,8 +354,25 @@ export async function resetToFreeTier(userId) {
       tokenLimit: TIER_LIMITS.free,
       allocatedTokens: 0,
       extraTokens: 0
+    },
+    update: {
+      // Reset to free tier limits
+      tokens: 0,
+      tokenLimit: TIER_LIMITS.free,
+      allocatedTokens: 0
     }
   });
+
+  // Deactivate all active digests - they likely exceed free tier limits
+  // User can reactivate smaller digests manually if they fit within 10K tokens
+  const deactivatedDigests = await prisma.digest.updateMany({
+    where: { userId, isActive: true },
+    data: { isActive: false }
+  });
+
+  if (deactivatedDigests.count > 0) {
+    console.log(`Deactivated ${deactivatedDigests.count} digest(s) for user ${userId} due to subscription cancellation`);
+  }
 
   console.log(`Created fresh free tier period for user ${userId}: ${periodStart.toISOString()} - ${periodEnd.toISOString()}`);
 }

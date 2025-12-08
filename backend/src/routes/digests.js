@@ -199,6 +199,62 @@ router.put('/:id', authenticateToken, async (req, res) => {
       }
     });
 
+    // Check if user is trying to ACTIVATE a paused digest
+    const isActivating = updates.isActive === true && digest.isActive === false;
+
+    if (isActivating) {
+      const hasSubscription = await stripeService.hasActiveSubscription(req.user.id);
+
+      // Use updated values if provided, otherwise use existing digest values
+      const frequency = updates.frequency || digest.frequency;
+      const audioLength = updates.audioLength || digest.audioLength;
+
+      // FREE TIER RESTRICTIONS (same as create endpoint)
+      if (!hasSubscription) {
+        // Check if user already has an active digest (excluding this one)
+        const existingDigests = await prisma.digest.count({
+          where: { userId: req.user.id, isActive: true, id: { not: digest.id } }
+        });
+
+        if (existingDigests >= 1) {
+          return res.status(403).json({
+            error: 'Free tier allows only 1 active digest. Upgrade to Pro for unlimited digests!',
+            upgradeRequired: true
+          });
+        }
+
+        // Restrict to daily/weekly only (no monthly)
+        if (frequency === 'monthly') {
+          return res.status(403).json({
+            error: 'Monthly digests require Pro subscription. Free tier supports daily or weekly only.',
+            upgradeRequired: true
+          });
+        }
+
+        // Restrict to max 5-minute audio
+        if (audioLength > 5) {
+          return res.status(403).json({
+            error: '10-minute digests require Pro subscription. Free tier maximum is 5 minutes.',
+            upgradeRequired: true
+          });
+        }
+      }
+
+      // Check token allocation
+      const monthlyAllocation = stripeService.calculateDigestAllocation(audioLength, frequency);
+      const canAllocate = await stripeService.allocateDigestTokens(req.user.id, audioLength, frequency);
+
+      if (!canAllocate) {
+        const remaining = await stripeService.getRemainingTokens(req.user.id);
+        return res.status(403).json({
+          error: `Not enough tokens. This digest needs ${monthlyAllocation} tokens/month. You have ${remaining} available.`,
+          tokensNeeded: monthlyAllocation,
+          tokensAvailable: remaining,
+          upgradeRequired: !hasSubscription
+        });
+      }
+    }
+
     // Recalculate next generation if frequency changed
     if (updates.frequency) {
       updates.nextGenerationAt = calculateNextGeneration(updates.frequency);
